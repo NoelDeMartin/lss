@@ -11,7 +11,8 @@
 |
 */
 
-uses(Tests\TestCase::class)->in('Feature');
+uses(Tests\TestCase::class)->in('Pages');
+uses(Tests\TestCase::class)->in('Services');
 
 /*
 |--------------------------------------------------------------------------

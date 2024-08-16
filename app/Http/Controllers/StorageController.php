@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Support\Facades\PodStorage;
-use EasyRdf\Graph;
-use EasyRdf\Parser\Turtle as TurtleParser;
-use EasyRdf\Serialiser\Turtle as TurtleSerializer;
+use App\Support\Facades\Sparql;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class StorageController extends Controller
@@ -34,8 +32,6 @@ class StorageController extends Controller
     public function update()
     {
         if (request()->header('Content-Type') !== 'application/sparql-update') {
-            dd(request()->header('Content-Type'));
-
             abort(400, 'Invalid content type, expected application/sparql-update');
         }
 
@@ -80,33 +76,7 @@ class StorageController extends Controller
             $this->createTurtle($path, $turtle);
         }
 
-        $baseUri = url($path);
-        $documentGraph = new Graph;
-        $insertGraph = new Graph;
-        $parser = new TurtleParser;
-        $serializer = new TurtleSerializer;
-
-        preg_match('/INSERT DATA {(?<insert>.*)}/s', $sparql, $matches);
-
-        $parser->parse($documentGraph, $turtle, 'turtle', $baseUri);
-        $parser->parse($insertGraph, $matches['insert'], 'turtle', $baseUri);
-
-        foreach ($insertGraph->resources() as $resource) {
-            foreach ($resource->propertyUris() as $property) {
-                $literals = $resource->allLiterals("<$property>");
-                $resources = $resource->allResources("<$property>");
-
-                foreach ($literals as $value) {
-                    $documentGraph->addLiteral($resource, $property, $value);
-                }
-
-                foreach ($resources as $value) {
-                    $documentGraph->addResource($resource, $property, $value);
-                }
-            }
-        }
-
-        PodStorage::write("$path.ttl", $serializer->serialise($documentGraph, 'turtle'));
+        PodStorage::write("$path.ttl", Sparql::updateTurtle($turtle, $sparql, ['base' => $path]));
 
         return $status;
     }

@@ -2,7 +2,7 @@
 
 namespace App\Support\Facades;
 
-use App\Support\Testing\Fakes\PodStorageManagerFake;
+use App\Support\Testing\Fakes\PodStorageServiceFake;
 use Illuminate\Support\Facades\Facade;
 
 /**
@@ -10,13 +10,13 @@ use Illuminate\Support\Facades\Facade;
  * @method static string[] list(string $path);
  * @method static void write(string $path, string $contents);
  *
- * @see \App\Services\PodStorageManager
+ * @see \App\Services\PodStorageService
  */
 class PodStorage extends Facade
 {
-    public static function fake(): PodStorageManagerFake
+    public static function fake(): PodStorageServiceFake
     {
-        return tap(new PodStorageManagerFake, function ($fake) {
+        return tap(new PodStorageServiceFake, function ($fake) {
             static::swap($fake);
         });
     }

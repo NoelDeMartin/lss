@@ -29,6 +29,7 @@ beforeEach(function () {
             terms:created "2021-09-03T14:40:00Z"^^XML:dateTime ;
             terms:modified "2021-09-03T14:40:00Z"^^XML:dateTime .
     ');
+    $this->fakePodStorage->write('/movies/action/.meta.ttl', '<> rdfs:label "Action Movies" .');
 });
 
 test('Reads documents', function () {
@@ -46,6 +47,7 @@ test('Reads containers', function () {
     $response->assertSee('rdfs:label "Movies"', false);
     $response->assertSee('<> a <http://www.w3.org/ns/ldp#Container>', false);
     $response->assertSee('<http://www.w3.org/ns/ldp#contains> </movies/spirited-away>', false);
+    $response->assertSee('<http://www.w3.org/ns/ldp#contains> </movies/action/>', false);
 });
 
 test('Updates documents', function () {

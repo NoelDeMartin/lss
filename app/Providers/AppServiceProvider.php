@@ -2,7 +2,8 @@
 
 namespace App\Providers;
 
-use App\Services\PodStorageManager;
+use App\Services\PodStorageService;
+use App\Services\SparqlService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -12,7 +13,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton('pod-storage', PodStorageManager::class);
+        $this->app->singleton('pod-storage', PodStorageService::class);
+        $this->app->singleton('sparql', SparqlService::class);
     }
 
     /**
