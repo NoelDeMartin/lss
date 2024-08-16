@@ -12,7 +12,9 @@ class StorageController extends Controller
     {
         $path = request()->getPathInfo();
 
-        return response($this->readTurtle($path))->header('Content-Type', 'text/turtle');
+        return response($this->readTurtle($path))
+            ->header('WAC-Allow', 'user="read control write"')
+            ->header('Content-Type', 'text/turtle');
     }
 
     public function create()
