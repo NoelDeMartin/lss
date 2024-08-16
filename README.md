@@ -5,4 +5,4 @@
 
 LSS (Laravel Solid Server) is a [Solid server](https://solidproject.org) built with [Laravel](https://laravel.com/).
 
-Currently, it's just a proof of concept and doesn't even support authentication or authorization. But the basic CRUD operations are implemented, and it already works with a couple of apps ignoring the authentication logic (See the `lss` branches in [Ramen](https://github.com/NoelDeMartin/ramen/tree/lss) and [Solid Focus](https://github.com/NoelDeMartin/solid-focus/tree/lss)).
+Currently, it's just a proof of concept and doesn't support any of the hairy stuff (authentication, authorization, content negotiation, etc.). But the basic CRUD operations are implemented, and it already works with a couple of apps ignoring the authentication logic (See the `lss` branches in [Ramen](https://github.com/NoelDeMartin/ramen/tree/lss) and [Solid Focus](https://github.com/NoelDeMartin/solid-focus/tree/lss)).
