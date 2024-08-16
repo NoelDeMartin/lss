@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Middleware\HandleCors as AppHandleCors;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\HandleCors;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -10,7 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->replace(HandleCors::class, AppHandleCors::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
