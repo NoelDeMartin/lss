@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -11,8 +14,7 @@
 |
 */
 
-uses(Tests\TestCase::class)->in('Pages');
-uses(Tests\TestCase::class)->in('Services');
+uses(TestCase::class, RefreshDatabase::class)->in('Feature');
 
 /*
 |--------------------------------------------------------------------------
@@ -25,7 +27,9 @@ uses(Tests\TestCase::class)->in('Services');
 |
 */
 
-// ...
+expect()->extend('toBeOne', function () {
+    return $this->toBe(1);
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -38,4 +42,7 @@ uses(Tests\TestCase::class)->in('Services');
 |
 */
 
-// ...
+function something()
+{
+    // ..
+}
