@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Support\Facades\PodStorage;
 use App\Support\Facades\Sparql;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class StorageController extends Controller
@@ -12,6 +13,10 @@ class StorageController extends Controller
     {
         $path = request()->getPathInfo();
 
+        if ($path !== '/profile/card') {
+            $this->authenticate();
+        }
+
         return response($this->readTurtle($path))
             ->header('WAC-Allow', 'user="read control write"')
             ->header('Content-Type', 'text/turtle');
@@ -19,6 +24,8 @@ class StorageController extends Controller
 
     public function create()
     {
+        $this->authenticate();
+
         if (request()->header('Content-Type') !== 'text/turtle') {
             abort(400, 'Invalid content type, expected text/turtle');
         }
@@ -33,6 +40,8 @@ class StorageController extends Controller
 
     public function update()
     {
+        $this->authenticate();
+
         if (request()->header('Content-Type') !== 'application/sparql-update') {
             abort(400, 'Invalid content type, expected application/sparql-update');
         }
@@ -42,6 +51,16 @@ class StorageController extends Controller
         $status = $this->updateTurtle($path, $sparql);
 
         return response('', $status);
+    }
+
+    private function authenticate(): void
+    {
+        // TODO this only checks for a logged in user, it should also check that the
+        // resource being used belongs to the user.
+
+        if (! Auth::guard('solid')->check()) {
+            abort(401);
+        }
     }
 
     private function readTurtle(string $path): string
