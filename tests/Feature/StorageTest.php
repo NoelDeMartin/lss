@@ -34,7 +34,7 @@ beforeEach(function () {
     $this->fakePodStorage->write('/movies/action/.meta.ttl', '<> rdfs:label "Action Movies" .');
 });
 
-it('Requires authentication', function () {
+it('requires authentication', function () {
     // Profile is the only publicly readable document.
     $this->get('/profile/card')->assertStatus(200);
 
@@ -46,7 +46,7 @@ it('Requires authentication', function () {
     $this->putTurtle('/settings/privateTypeIndex', '')->assertStatus(401);
 });
 
-it('Reads documents', function () {
+it('reads documents', function () {
     $response = $this->get('/profile/card');
 
     $response->assertStatus(200);
@@ -54,7 +54,7 @@ it('Reads documents', function () {
     $response->assertSee('a foaf:PersonalProfileDocument');
 });
 
-it('Reads containers', function () {
+it('reads containers', function () {
     Passport::actingAs(User::factory()->create(), [], 'solid');
 
     $response = $this->get('/movies/');
@@ -66,7 +66,7 @@ it('Reads containers', function () {
     $response->assertSee('<http://www.w3.org/ns/ldp#contains> </movies/action/>', false);
 });
 
-it('Updates documents', function () {
+it('updates documents', function () {
     Passport::actingAs(User::factory()->create(), [], 'solid');
 
     $response = $this->sparqlUpdate('/profile/card', '
@@ -79,7 +79,7 @@ it('Updates documents', function () {
     $this->fakePodStorage->assertContains('/profile/card.ttl', 'privateTypeIndex <http://localhost/settings/privateTypeIndex>');
 });
 
-it('Creates documents using PUT', function () {
+it('creates documents using PUT', function () {
     Passport::actingAs(User::factory()->create(), [], 'solid');
 
     $response = $this->putTurtle('/settings/privateTypeIndex', '<> a <http://www.w3.org/ns/solid/terms#TypeIndex> .');
@@ -88,7 +88,7 @@ it('Creates documents using PUT', function () {
     $this->fakePodStorage->assertContains('/settings/privateTypeIndex.ttl', '<> a <http://www.w3.org/ns/solid/terms#TypeIndex> .');
 });
 
-it('Creates documents using PATCH', function () {
+it('creates documents using PATCH', function () {
     Passport::actingAs(User::factory()->create(), [], 'solid');
 
     $response = $this->sparqlUpdate('/settings/privateTypeIndex', '
@@ -100,7 +100,7 @@ it('Creates documents using PATCH', function () {
     $this->fakePodStorage->assertContains('/settings/privateTypeIndex.ttl', 'TypeIndex');
 });
 
-it('Creates containers', function () {
+it('creates containers', function () {
     Passport::actingAs(User::factory()->create(), [], 'solid');
 
     $response = $this->putTurtle('/cookbook/', '<> rdfs:label "Container" .');

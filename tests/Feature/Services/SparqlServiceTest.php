@@ -2,7 +2,7 @@
 
 use App\Support\Facades\Sparql;
 
-it('Inserts triples', function () {
+it('inserts triples', function () {
     // Arrange.
     $turtle = '';
     $sparql = '
@@ -23,7 +23,7 @@ it('Inserts triples', function () {
     expect($updated)->toContain('<https://alice.com/settings/privateTypeIndex>');
 });
 
-it('Deletes triples', function () {
+it('deletes triples', function () {
     // Arrange.
     $turtle = '
         @prefix card: <https://alice.com/profile/card#> .
@@ -47,7 +47,7 @@ it('Deletes triples', function () {
     expect($updated)->toBe('');
 });
 
-it('Updates triples', function () {
+it('updates triples', function () {
     // Arrange.
     $turtle = '
         @prefix rdfs: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
