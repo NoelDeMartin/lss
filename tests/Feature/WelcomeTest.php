@@ -1,6 +1,6 @@
 <?php
 
-test('Shows LSS', function () {
+it('Shows LSS', function () {
     $response = $this->get('/');
 
     $response->assertStatus(200);
