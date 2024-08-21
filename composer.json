@@ -9,7 +9,9 @@
         "easyrdf/easyrdf": "^1.1",
         "laravel/framework": "^11.9",
         "laravel/passport": "^12.3",
-        "laravel/tinker": "^2.9"
+        "laravel/tinker": "^2.9",
+        "lcobucci/jwt": "^5.3",
+        "strobotti/php-jwk": "^1.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -53,7 +55,9 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": []
+            "dont-discover": [
+                "laravel/passport"
+            ]
         }
     },
     "config": {

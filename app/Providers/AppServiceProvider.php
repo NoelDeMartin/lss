@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\Client;
+use App\Services\JWTService;
 use App\Services\PodStorageService;
 use App\Services\SparqlService;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,6 +16,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->singleton('jwt', JWTService::class);
         $this->app->singleton('pod-storage', PodStorageService::class);
         $this->app->singleton('sparql', SparqlService::class);
     }
@@ -22,6 +26,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Passport::useClientModel(Client::class);
+        Passport::tokensCan([
+            'webid' => 'Log in using WebID',
+            'openid' => 'Verify OpenID identity',
+            'offline_access' => 'Get refresh tokens',
+        ]);
     }
 }

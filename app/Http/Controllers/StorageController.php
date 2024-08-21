@@ -56,7 +56,7 @@ class StorageController extends Controller
     private function authenticate(): void
     {
         // TODO this only checks for a logged in user, it should also check that the
-        // resource being used belongs to the user.
+        // resource being used belongs to the user in order to support multi-tenancy.
 
         if (! Auth::guard('solid')->check()) {
             abort(401);

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "df4a00fd8fcf3d326dd662a05f401d5c",
+    "content-hash": "d5908635e6f1c919942968a6195e77bd",
     "packages": [
         {
             "name": "brick/math",
@@ -4147,6 +4147,61 @@
                 }
             ],
             "time": "2024-04-27T21:32:50+00:00"
+        },
+        {
+            "name": "strobotti/php-jwk",
+            "version": "v1.4.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Strobotti/php-jwk.git",
+                "reference": "091700d8874be5a8aecd8bda3eb1cc7e41559f31"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Strobotti/php-jwk/zipball/091700d8874be5a8aecd8bda3eb1cc7e41559f31",
+                "reference": "091700d8874be5a8aecd8bda3eb1cc7e41559f31",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "ext-openssl": "*",
+                "php": ">=7.3.0",
+                "phpseclib/phpseclib": "^3.0"
+            },
+            "require-dev": {
+                "ext-xml": "*",
+                "friendsofphp/php-cs-fixer": "3.54.0",
+                "phpunit/phpunit": "^10.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Strobotti\\JWK\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Juha Jantunen",
+                    "email": "juha@strobotti.com",
+                    "homepage": "https://www.strobotti.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A small PHP library to handle JWKs (Json Web Keys)",
+            "homepage": "https://github.com/Strobotti/php-jwk",
+            "keywords": [
+                "JWK",
+                "JWKS"
+            ],
+            "support": {
+                "issues": "https://github.com/Strobotti/php-jwk/issues",
+                "source": "https://github.com/Strobotti/php-jwk/tree/v1.4.4"
+            },
+            "time": "2024-04-30T12:23:57+00:00"
         },
         {
             "name": "symfony/clock",

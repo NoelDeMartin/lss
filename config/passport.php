@@ -72,4 +72,15 @@ return [
         'secret' => env('PASSPORT_PERSONAL_ACCESS_CLIENT_SECRET'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Path
+    |--------------------------------------------------------------------------
+    |
+    | Path where the passport endpoints will be served.
+    |
+    */
+
+    'path' => '.oidc',
+
 ];
