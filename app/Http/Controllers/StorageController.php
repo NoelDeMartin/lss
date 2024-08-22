@@ -104,9 +104,9 @@ class StorageController extends Controller
 
     private function readContainerTurtle(string $path): ?string
     {
-        $turtle = PodStorage::read("$path.meta.ttl");
+        $turtle = PodStorage::read("$path.meta.ttl") ?? '';
 
-        if (is_null($turtle)) {
+        if (empty($turtle) && ! PodStorage::exists($path)) {
             return null;
         }
 

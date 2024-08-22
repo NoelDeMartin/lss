@@ -21,6 +21,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'nextcloud_url',
+        'nextcloud_username',
+        'nextcloud_password',
     ];
 
     /**
@@ -30,6 +33,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $hidden = [
         'password',
+        'nextcloud_password',
         'remember_token',
     ];
 

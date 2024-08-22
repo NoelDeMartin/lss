@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static string|null read(string $path);
  * @method static string[] list(string $path);
  * @method static void write(string $path, string $contents);
+ * @method static bool exists(string $path);
  *
  * @see \App\Services\PodStorageService
  */

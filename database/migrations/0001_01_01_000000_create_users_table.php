@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('nextcloud_url')->nullable();
+            $table->string('nextcloud_username')->nullable();
+            $table->string('nextcloud_password')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

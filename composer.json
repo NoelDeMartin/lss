@@ -11,6 +11,8 @@
         "laravel/passport": "^12.3",
         "laravel/tinker": "^2.9",
         "lcobucci/jwt": "^5.3",
+        "league/flysystem-webdav": "^3.28",
+        "sabre/dav": "^4.6",
         "strobotti/php-jwk": "^1.4"
     },
     "require-dev": {

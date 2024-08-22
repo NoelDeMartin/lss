@@ -2,19 +2,24 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\File;
+use App\Models\User;
+use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Filesystem\FilesystemAdapter;
+use League\Flysystem\Filesystem as LeagueFilesystem;
+use League\Flysystem\WebDAV\WebDAVAdapter;
+use Sabre\DAV\Client;
 
 class PodStorageService
 {
+    protected $cloud = null;
+
     public function read(string $path): ?string
     {
-        $path = storage_path("data$path");
-
-        if (! File::exists($path)) {
+        if (! $this->exists($path)) {
             return null;
         }
 
-        return File::get($path);
+        return $this->cloud()->get($path);
     }
 
     public function list(string $path): array
@@ -26,25 +31,51 @@ class PodStorageService
 
     public function write(string $path, string $contents): void
     {
-        $path = storage_path("data$path");
+        $this->cloud()->put($path, $contents);
+    }
 
-        File::ensureDirectoryExists(dirname($path));
-        File::put($path, $contents);
+    public function exists(string $path): bool
+    {
+        return $this->cloud()->exists($path);
     }
 
     protected function listFiles(string $path): array
     {
-        $path = storage_path("data$path");
         $files = [];
 
-        foreach (File::files($path) as $file) {
-            $files[] = $file->getFilename();
+        foreach ($this->cloud()->files($path) as $file) {
+            $files[] = basename($file);
         }
 
-        foreach (File::directories($path) as $directory) {
+        foreach ($this->cloud()->directories($path) as $directory) {
             $files[] = basename($directory).'/';
         }
 
-        return $files;
+        return array_filter($files, fn ($filename) => ! str_starts_with($filename, '.'));
+    }
+
+    protected function cloud(): Filesystem
+    {
+        if (is_null($this->cloud)) {
+            // TODO fix this for multi-tenancy.
+            $user = User::first();
+            $folder = 'Solid';
+            $config = [
+                'baseUri' => $user->nextcloud_url,
+                'userName' => $user->nextcloud_username,
+                'password' => $user->nextcloud_password,
+                'throw' => app()->hasDebugModeEnabled(),
+            ];
+            $client = new Client($config);
+            $adapter = new WebDAVAdapter($client, "remote.php/dav/files/{$user->nextcloud_username}/$folder/");
+
+            $this->cloud = new FilesystemAdapter(
+                new LeagueFilesystem($adapter, $config),
+                $adapter,
+                $config
+            );
+        }
+
+        return $this->cloud;
     }
 }
