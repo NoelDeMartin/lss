@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'exclude' => ['/'],
+    'exclude' => ['/login', '/logout', '/register'],
 
     'allowed_methods' => ['*'],
 

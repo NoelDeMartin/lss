@@ -13,6 +13,10 @@ class StorageController extends Controller
     {
         $path = request()->getPathInfo();
 
+        if ($path === '/' && ! $this->wantsTurtle()) {
+            return view('welcome');
+        }
+
         if ($path !== '/profile/card') {
             $this->authenticate();
         }
@@ -51,6 +55,13 @@ class StorageController extends Controller
         $status = $this->updateTurtle($path, $sparql);
 
         return response('', $status);
+    }
+
+    private function wantsTurtle(): bool
+    {
+        $acceptable = request()->getAcceptableContentTypes();
+
+        return isset($acceptable[0]) && str_contains(strtolower($acceptable[0]), 'text/turtle');
     }
 
     private function authenticate(): void
