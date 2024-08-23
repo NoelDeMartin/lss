@@ -4,10 +4,6 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Contracts\Filesystem\Filesystem;
-use Illuminate\Filesystem\FilesystemAdapter;
-use League\Flysystem\Filesystem as LeagueFilesystem;
-use League\Flysystem\WebDAV\WebDAVAdapter;
-use Sabre\DAV\Client;
 
 class PodStorageService
 {
@@ -57,23 +53,13 @@ class PodStorageService
     protected function cloud(): Filesystem
     {
         if (is_null($this->cloud)) {
-            // TODO fix this for multi-tenancy.
-            $user = User::first();
-            $folder = 'Solid';
-            $config = [
-                'baseUri' => $user->nextcloud_url,
-                'userName' => $user->nextcloud_username,
-                'password' => $user->nextcloud_password,
-                'throw' => app()->hasDebugModeEnabled(),
-            ];
-            $client = new Client($config);
-            $adapter = new WebDAVAdapter($client, "remote.php/dav/files/{$user->nextcloud_username}/$folder/");
+            $user = User::whereUsername(request()->username())->first();
 
-            $this->cloud = new FilesystemAdapter(
-                new LeagueFilesystem($adapter, $config),
-                $adapter,
-                $config
-            );
+            if (! $user->hasCloud()) {
+                abort(400, 'Cloud configuration missing.');
+            }
+
+            $this->cloud = $user->cloud();
         }
 
         return $this->cloud;

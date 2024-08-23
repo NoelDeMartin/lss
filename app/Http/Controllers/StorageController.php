@@ -9,11 +9,11 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class StorageController extends Controller
 {
-    public function read()
+    public function show()
     {
         $path = request()->getPathInfo();
 
-        if ($path === '/' && ! $this->wantsTurtle()) {
+        if ($path === '/' && ! request()->wantsTurtle()) {
             return view('welcome');
         }
 
@@ -57,19 +57,17 @@ class StorageController extends Controller
         return response('', $status);
     }
 
-    private function wantsTurtle(): bool
-    {
-        $acceptable = request()->getAcceptableContentTypes();
-
-        return isset($acceptable[0]) && str_contains(strtolower($acceptable[0]), 'text/turtle');
-    }
-
     private function authenticate(): void
     {
-        // TODO this only checks for a logged in user, it should also check that the
-        // resource being used belongs to the user in order to support multi-tenancy.
+        $username = request()->username();
 
-        if (! Auth::guard('solid')->check()) {
+        if (is_null($username)) {
+            abort(404);
+        }
+
+        $user = Auth::guard('solid')->user();
+
+        if (is_null($user) || $user->username !== $username) {
             abort(401);
         }
     }

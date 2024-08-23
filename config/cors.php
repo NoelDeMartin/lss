@@ -15,7 +15,23 @@ return [
     |
     */
 
-    'exclude' => ['/login', '/logout', '/register'],
+    'exclude' => [
+        'account',
+        'account/*',
+        'confirm-password',
+        'email',
+        'email/*',
+        'forgot-password',
+        'login',
+        'logout',
+        'password',
+        'register',
+        'reset-password',
+        'reset-password/*',
+        'up',
+        'verify-email',
+        'verify-email/*',
+    ],
 
     'allowed_methods' => ['*'],
 

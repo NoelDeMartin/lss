@@ -2,6 +2,7 @@
 
 namespace App\Auth\Server\ResponseTypes;
 
+use App\Models\User;
 use App\Support\Facades\JWT;
 use DateTimeImmutable;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
@@ -18,16 +19,19 @@ class BearerTokenResponse extends BaseBearerTokenResponse
 
     protected function getIdToken(AccessTokenEntityInterface $accessToken): string
     {
-        $userWebId = url('/profile/card#me');
+        url()->forceRootUrl(config('app.url'));
+
+        $user = User::find($accessToken->getUserIdentifier());
+        $webId = preg_replace('/https?\:\/\//', "$0{$user->username}.", url('/profile/card#me'));
         $clientId = $accessToken->getClient()->getIdentifier();
 
         return JWT::build()
             ->identifiedBy($accessToken->getIdentifier())
             ->issuedBy(route('home'))
             ->permittedFor('solid', $clientId)
-            ->relatedTo($userWebId)
+            ->relatedTo($webId)
             ->withClaim('azp', $clientId)
-            ->withClaim('webid', $userWebId)
+            ->withClaim('webid', $webId)
             ->issuedAt(new DateTimeImmutable)
             ->expiresAt($accessToken->getExpiryDateTime())
             ->getToken(JWT::signer(), JWT::signingKey())

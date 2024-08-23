@@ -23,6 +23,7 @@ test('OIDC flow', function () {
 
     // Request code.
     $user = User::factory()->create();
+    $username = $user->username;
     $state = Str::random(40);
     $codeVerifier = Str::random(128);
     $codeChallenge = strtr(rtrim(base64_encode(hash('sha256', $codeVerifier, true)), '='), '+/', '-_');
@@ -55,7 +56,7 @@ test('OIDC flow', function () {
     $response->assertJson(fn (AssertableJson $json) => $json->hasAll(['id_token', 'token_type', 'expires_in', 'access_token', 'refresh_token']));
 
     $token = JWT::parse($response->json('id_token'));
-    expect($token->isRelatedTo('http://localhost/profile/card#me'))->toBeTrue();
+    expect($token->isRelatedTo("http://$username.localhost/profile/card#me"))->toBeTrue();
 });
 
 it('exposes public keys', function () {
@@ -83,6 +84,7 @@ it('uses DPoP headers to authenticate', function () {
         ->getToken(JWT::signer(), JWT::signingKey())
         ->toString();
     $response = $this
+        ->forUser($user)
         ->withHeader('Authorization', "DPoP $jwt")
         ->putTurtle('/settings/privateTypeIndex', '<> a <http://www.w3.org/ns/solid/terms#TypeIndex> .');
 
