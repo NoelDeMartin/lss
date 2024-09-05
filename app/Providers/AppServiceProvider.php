@@ -5,7 +5,7 @@ namespace App\Providers;
 use App\Models\Client;
 use App\Services\CloudService;
 use App\Services\JWTService;
-use App\Services\PodStorageService;
+use App\Services\SolidService;
 use App\Services\SparqlService;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
@@ -20,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton('cloud', CloudService::class);
         $this->app->singleton('jwt', JWTService::class);
-        $this->app->singleton('pod-storage', PodStorageService::class);
+        $this->app->singleton('solid', SolidService::class);
         $this->app->singleton('sparql', SparqlService::class);
     }
 

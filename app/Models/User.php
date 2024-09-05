@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\UserSaved;
 use App\Support\Facades\Cloud;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Filesystem\Filesystem;
@@ -31,6 +32,15 @@ class User extends Authenticatable implements MustVerifyEmail
         'nextcloud_url',
         'nextcloud_username',
         'nextcloud_password',
+    ];
+
+    /**
+     * The event map for the model.
+     *
+     * @var array<string, string>
+     */
+    protected $dispatchesEvents = [
+        'saved' => UserSaved::class,
     ];
 
     /**

@@ -4,8 +4,8 @@ use App\Models\User;
 use App\Support\Facades\Cloud;
 
 beforeEach(function () {
-    $this->user = User::factory()->nextcloud()->create();
     $this->cloud = Cloud::fake();
+    $this->user = User::factory()->nextcloud()->create();
 
     $filesystem = $this->cloud->forUser($this->user);
     $filesystem->put('/Solid/.meta.ttl', '<> rdfs:label "Root" .');

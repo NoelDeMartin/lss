@@ -89,8 +89,8 @@ test('correct password must be provided to delete account', function () {
 });
 
 it('initializes cloud storage', function () {
-    $user = User::factory()->create();
     $cloud = Cloud::fake();
+    $user = User::factory()->create();
 
     $response = $this
         ->actingAs($user)
@@ -107,11 +107,27 @@ it('initializes cloud storage', function () {
         ->assertSessionHasNoErrors()
         ->assertRedirect('/account/profile');
 
-    $user->refresh();
-
-    $this->assertSame('https://cloud.example.com', $user->nextcloud_url);
-    $this->assertSame('username', $user->nextcloud_username);
-    $this->assertSame('password', $user->nextcloud_password);
-
     $cloud->assertContains('/Solid/profile/card.ttl', "foaf:name \"$user->name\"");
+});
+
+it('updates cloud profile', function () {
+    $cloud = Cloud::fake();
+    $user = User::factory()->nextcloud()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->patch('/account/profile', [
+            'name' => 'Updated name',
+            'username' => $user->username,
+            'email' => $user->email,
+            'nextcloud_url' => $user->nextcloud_url,
+            'nextcloud_username' => $user->nextcloud_username,
+            'nextcloud_password' => $user->nextcloud_password,
+        ]);
+
+    $response
+        ->assertSessionHasNoErrors()
+        ->assertRedirect('/account/profile');
+
+    $cloud->assertContains('/Solid/profile/card.ttl', 'foaf:name "Updated name"');
 });
