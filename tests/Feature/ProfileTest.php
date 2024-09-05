@@ -113,6 +113,7 @@ it('initializes cloud storage', function () {
 it('updates cloud profile', function () {
     $cloud = Cloud::fake();
     $user = User::factory()->nextcloud()->create();
+    $originalName = $user->name;
 
     $response = $this
         ->actingAs($user)
@@ -129,5 +130,7 @@ it('updates cloud profile', function () {
         ->assertSessionHasNoErrors()
         ->assertRedirect('/account/profile');
 
+    $cloud->assertContains('/Solid/profile/card.ttl', $user->url());
     $cloud->assertContains('/Solid/profile/card.ttl', 'foaf:name "Updated name"');
+    $cloud->assertDoesntContain('/Solid/profile/card.ttl', "foaf:name \"{$originalName}\"");
 });

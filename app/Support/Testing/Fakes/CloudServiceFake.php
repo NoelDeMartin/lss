@@ -30,4 +30,9 @@ class CloudServiceFake extends CloudService implements Fake
     {
         expect($this->filesystem->read($path))->toContain($contents);
     }
+
+    public function assertDoesntContain(string $path, string $contents): void
+    {
+        expect($this->filesystem->read($path))->not->toContain($contents);
+    }
 }

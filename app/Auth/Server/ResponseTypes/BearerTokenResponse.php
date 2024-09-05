@@ -19,10 +19,8 @@ class BearerTokenResponse extends BaseBearerTokenResponse
 
     protected function getIdToken(AccessTokenEntityInterface $accessToken): string
     {
-        url()->forceRootUrl(config('app.url'));
-
         $user = User::find($accessToken->getUserIdentifier());
-        $webId = preg_replace('/https?\:\/\//', "$0{$user->username}.", url('/profile/card#me'));
+        $webId = $user->url('/profile/card#me');
         $clientId = $accessToken->getClient()->getIdentifier();
 
         return JWT::build()

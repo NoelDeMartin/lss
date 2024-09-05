@@ -9,11 +9,14 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Routing\UrlGenerator;
 use Laravel\Passport\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
+
+    protected static $urlGenerator = null;
 
     public $cloud_folder = 'Solid';
 
@@ -72,6 +75,17 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return $this->cloud;
+    }
+
+    public function url(string $path = ''): string
+    {
+        if (is_null(static::$urlGenerator)) {
+            static::$urlGenerator = app()->make(UrlGenerator::class);
+
+            static::$urlGenerator->forceRootUrl(config('app.url'));
+        }
+
+        return preg_replace('/https?\:\/\//', "$0{$this->username}.", static::$urlGenerator->to($path));
     }
 
     /**

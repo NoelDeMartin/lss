@@ -53,7 +53,10 @@ class SolidService
 
         $turtle = $this->cloud()->get($this->preparePath("$path.ttl"));
 
-        $this->cloud()->put($this->preparePath("$path.ttl"), Sparql::updateTurtle($turtle, $sparql, ['base' => $path]));
+        $this->cloud()->put(
+            $this->preparePath("$path.ttl"),
+            Sparql::updateTurtle($turtle, $sparql, ['base' => $this->user()->url($path)])
+        );
     }
 
     protected function createProfile(User $user): void
@@ -67,7 +70,7 @@ class SolidService
 
     protected function updateProfile(User $user): void
     {
-        $base = '/profile/card';
+        $base = $user->url('/profile/card');
         $turtle = $user->cloud()->get("/{$user->cloud_folder}/profile/card.ttl");
         $graph = new Graph($base);
         $serialiser = new TurtleSerializer;
