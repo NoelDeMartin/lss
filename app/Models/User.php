@@ -2,20 +2,21 @@
 
 namespace App\Models;
 
+use App\Support\Facades\Cloud;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
-use League\Flysystem\Filesystem as LeagueFilesystem;
-use League\Flysystem\WebDAV\WebDAVAdapter;
-use Sabre\DAV\Client;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
+
+    public $cloud_folder = 'Solid';
+
+    protected $cloud = null;
 
     /**
      * The attributes that are mass assignable.
@@ -56,21 +57,11 @@ class User extends Authenticatable implements MustVerifyEmail
             return null;
         }
 
-        $folder = 'Solid';
-        $config = [
-            'baseUri' => $this->nextcloud_url,
-            'userName' => $this->nextcloud_username,
-            'password' => $this->nextcloud_password,
-            'throw' => app()->hasDebugModeEnabled(),
-        ];
-        $client = new Client($config);
-        $adapter = new WebDAVAdapter($client, "remote.php/dav/files/{$this->nextcloud_username}/$folder/");
+        if (is_null($this->cloud)) {
+            $this->cloud = Cloud::forUser($this);
+        }
 
-        return new FilesystemAdapter(
-            new LeagueFilesystem($adapter, $config),
-            $adapter,
-            $config
-        );
+        return $this->cloud;
     }
 
     /**

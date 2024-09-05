@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Support\Facades\Cloud;
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();
@@ -85,4 +86,32 @@ test('correct password must be provided to delete account', function () {
         ->assertRedirect('/account/profile');
 
     $this->assertNotNull($user->fresh());
+});
+
+it('initializes cloud storage', function () {
+    $user = User::factory()->create();
+    $cloud = Cloud::fake();
+
+    $response = $this
+        ->actingAs($user)
+        ->patch('/account/profile', [
+            'name' => $user->name,
+            'username' => $user->username,
+            'email' => $user->email,
+            'nextcloud_url' => 'https://cloud.example.com',
+            'nextcloud_username' => 'username',
+            'nextcloud_password' => 'password',
+        ]);
+
+    $response
+        ->assertSessionHasNoErrors()
+        ->assertRedirect('/account/profile');
+
+    $user->refresh();
+
+    $this->assertSame('https://cloud.example.com', $user->nextcloud_url);
+    $this->assertSame('username', $user->nextcloud_username);
+    $this->assertSame('password', $user->nextcloud_password);
+
+    $cloud->assertContains('/Solid/profile/card.ttl', "foaf:name \"$user->name\"");
 });

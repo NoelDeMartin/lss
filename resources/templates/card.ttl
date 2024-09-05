@@ -6,5 +6,6 @@
 
 <#me>
     a foaf:Person ;
+    foaf:name "{name}" ;
     pim:storage </> ;
-    solid:oidcIssuer <http://localhost> .
+    solid:oidcIssuer <{oidcIssuer}> .

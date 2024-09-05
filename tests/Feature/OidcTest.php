@@ -2,8 +2,8 @@
 
 use App\Models\Client;
 use App\Models\User;
+use App\Support\Facades\Cloud;
 use App\Support\Facades\JWT;
-use App\Support\Facades\PodStorage;
 use Illuminate\Support\Str;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Laravel\Passport\Token;
@@ -67,9 +67,9 @@ it('exposes public keys', function () {
 });
 
 it('uses DPoP headers to authenticate', function () {
-    PodStorage::fake();
+    Cloud::fake();
 
-    $user = User::factory()->create();
+    $user = User::factory()->nextcloud()->create();
     $client = Client::factory()->create();
     $token = Token::create([
         'id' => Str::random(),
@@ -84,7 +84,7 @@ it('uses DPoP headers to authenticate', function () {
         ->getToken(JWT::signer(), JWT::signingKey())
         ->toString();
     $response = $this
-        ->forUser($user)
+        ->forUserDomain($user)
         ->withHeader('Authorization', "DPoP $jwt")
         ->putTurtle('/settings/privateTypeIndex', '<> a <http://www.w3.org/ns/solid/terms#TypeIndex> .');
 

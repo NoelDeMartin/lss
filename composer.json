@@ -11,6 +11,7 @@
         "laravel/passport": "^12.3",
         "laravel/tinker": "^2.9",
         "lcobucci/jwt": "^5.3",
+        "league/flysystem-memory": "^3.28",
         "league/flysystem-webdav": "^3.28",
         "sabre/dav": "^4.6",
         "strobotti/php-jwk": "^1.4"
@@ -24,7 +25,8 @@
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.0",
         "pestphp/pest": "^2.0",
-        "pestphp/pest-plugin-laravel": "^2.0"
+        "pestphp/pest-plugin-laravel": "^2.0",
+        "spatie/invade": "^2.1"
     },
     "autoload": {
         "psr-4": {

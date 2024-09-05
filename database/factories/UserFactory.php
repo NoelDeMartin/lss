@@ -42,4 +42,18 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * With nextcloud settings.
+     */
+    public function nextcloud(): Factory
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'nextcloud_url' => fake()->unique()->url,
+                'nextcloud_username' => Str::slug(fake()->unique()->userName()),
+                'nextcloud_password' => Str::random(),
+            ];
+        });
+    }
 }

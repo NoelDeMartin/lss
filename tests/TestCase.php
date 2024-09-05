@@ -9,7 +9,7 @@ abstract class TestCase extends BaseTestCase
 {
     protected $username = null;
 
-    public function forUser(User $user)
+    public function forUserDomain(User $user)
     {
         $this->username = $user->username;
 
@@ -18,9 +18,9 @@ abstract class TestCase extends BaseTestCase
 
     public function authenticated()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->nextcloud()->create();
 
-        return $this->forUser($user)->actingAs($user, 'solid');
+        return $this->forUserDomain($user)->actingAs($user, 'solid');
     }
 
     public function readTurtle(string $path)

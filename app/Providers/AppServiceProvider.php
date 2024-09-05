@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Client;
+use App\Services\CloudService;
 use App\Services\JWTService;
 use App\Services\PodStorageService;
 use App\Services\SparqlService;
@@ -17,6 +18,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->singleton('cloud', CloudService::class);
         $this->app->singleton('jwt', JWTService::class);
         $this->app->singleton('pod-storage', PodStorageService::class);
         $this->app->singleton('sparql', SparqlService::class);
