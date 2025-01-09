@@ -33,7 +33,8 @@ class IsTurtle extends Constraint
         );
     }
 
-    protected function getParsingErrorMessage(string $turtle): ?string {
+    protected function getParsingErrorMessage(string $turtle): ?string
+    {
         try {
             (new Graph($this->uri))->parse($turtle, 'turtle');
 
