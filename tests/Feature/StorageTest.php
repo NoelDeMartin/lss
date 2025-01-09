@@ -90,6 +90,7 @@ it('updates documents', function () {
     ');
 
     $response->assertStatus(200);
+    $this->cloud->assertContains('/Solid/profile/card.ttl', '<#me>');
     $this->cloud->assertContains('/Solid/profile/card.ttl', 'privateTypeIndex <http://localhost/settings/privateTypeIndex>');
 });
 

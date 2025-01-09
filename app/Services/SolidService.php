@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Support\Facades\Sparql;
+use App\Support\Serializers\TurtleSerializer;
 use EasyRdf\Graph;
-use EasyRdf\Serialiser\Turtle as TurtleSerializer;
 use Illuminate\Contracts\Filesystem\Filesystem;
 
 class SolidService
@@ -77,7 +77,9 @@ class SolidService
 
         $graph->parse($turtle, 'turtle');
         $this->updateGraphProperty($graph, "$base#me", 'foaf:name', $user->name);
-        $user->cloud()->put("/{$user->cloud_folder}/profile/card.ttl", $serialiser->serialise($graph, 'turtle'));
+        $user->cloud()->put("/{$user->cloud_folder}/profile/card.ttl", $serialiser->serialise($graph, 'turtle', [
+            'implicit' => $base,
+        ]));
     }
 
     protected function updateGraphProperty(Graph $graph, string $resource, string $property, string $value): void

@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use App\Support\Serializers\TurtleSerializer;
 use EasyRdf\Graph;
-use EasyRdf\Serialiser\Turtle as TurtleSerializer;
 
 class SparqlService
 {
@@ -21,7 +21,7 @@ class SparqlService
             $this->applyOperation(strtolower($matches[1][$i]), $matches[2][$i], $graph);
         }
 
-        return $serializer->serialise($graph, 'turtle');
+        return $serializer->serialise($graph, 'turtle', ['implicit' => $baseUri]);
     }
 
     protected function applyOperation(string $operation, string $turtle, Graph $graph): void
