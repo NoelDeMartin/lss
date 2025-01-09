@@ -9,6 +9,7 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Routing\RouteCollection;
 use Illuminate\Routing\UrlGenerator;
 use Laravel\Passport\HasApiTokens;
 
@@ -85,7 +86,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function url(string $path = ''): string
     {
         if (is_null(static::$urlGenerator)) {
-            static::$urlGenerator = app()->make(UrlGenerator::class);
+            static::$urlGenerator = new UrlGenerator(new RouteCollection, request());
 
             static::$urlGenerator->forceRootUrl(config('app.url'));
         }
