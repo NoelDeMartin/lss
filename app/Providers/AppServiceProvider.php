@@ -7,8 +7,11 @@ use App\Services\CloudService;
 use App\Services\JWTService;
 use App\Services\SolidService;
 use App\Services\SparqlService;
+use App\Support\Testing\Constraints\IsTurtle;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Testing\Assert;
+use Illuminate\Testing\TestResponse;
 use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
@@ -47,5 +50,11 @@ class AppServiceProvider extends ServiceProvider
 
             return $matches[1] ?? null;
         });
+
+        if ($this->app->runningUnitTests()) {
+            TestResponse::macro('assertValidTurtle', function () {
+                Assert::assertThat($this->content(), new IsTurtle($this->baseRequest->uri()));
+            });
+        }
     }
 }

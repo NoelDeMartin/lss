@@ -20,7 +20,7 @@ beforeEach(function () {
             a foaf:Person;
             pim:storage </>.
     ');
-    $filesystem->put('/Solid/movies/.meta.ttl', '<> rdfs:label "Movies" .');
+    $filesystem->put('/Solid/movies/.meta.ttl', '<> <http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Movies" .');
     $filesystem->put('/Solid/movies/spirited-away.ttl', '
         @prefix schema: <https://schema.org/> .
         @prefix ldp: <http://www.w3.org/ns/ldp#> .
@@ -62,6 +62,7 @@ it('reads profile', function () {
     $response->assertStatus(200);
     $response->assertHeader('Content-Type', 'text/turtle; charset=UTF-8');
     $response->assertSee('a foaf:PersonalProfileDocument');
+    $response->assertValidTurtle();
 });
 
 it('reads documents', function () {
@@ -70,17 +71,19 @@ it('reads documents', function () {
     $response->assertStatus(200);
     $response->assertHeader('Content-Type', 'text/turtle; charset=UTF-8');
     $response->assertSee('a schema:Movie');
+    $response->assertValidTurtle();
 });
 
 it('reads containers', function () {
     $response = $this->authenticated()->readTurtle('/movies/');
 
     $response->assertStatus(200);
-    $response->assertSee('rdfs:label "Movies"', false);
+    $response->assertSee('<http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Movies"', false);
     $response->assertSee('<> a <http://www.w3.org/ns/ldp#Container>', false);
     $response->assertSee('<http://www.w3.org/ns/ldp#contains> </movies/spirited-away>', false);
     $response->assertSee('</movies/spirited-away> <http://purl.org/dc/terms/modified>', false);
     $response->assertSee('<http://www.w3.org/ns/ldp#contains> </movies/action/>', false);
+    $response->assertValidTurtle();
 });
 
 it('updates documents', function () {

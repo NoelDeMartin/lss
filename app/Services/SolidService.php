@@ -126,7 +126,7 @@ class SolidService
                 $name = $child['name'];
                 $lastModifiedTime = $child['last_modified'];
 
-                $turtle .= "\n<> <http://www.w3.org/ns/ldp#contains> <$path$name>";
+                $turtle .= "\n<> <http://www.w3.org/ns/ldp#contains> <$path$name> .";
 
                 if (! is_null($lastModifiedTime)) {
                     $lastModifiedDate = $date->setTimestamp($child['last_modified'])->toISOString();
