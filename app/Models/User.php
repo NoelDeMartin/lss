@@ -5,8 +5,8 @@ namespace App\Models;
 use App\Events\UserSaved;
 use App\Support\Facades\Cloud;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Routing\RouteCollection;
@@ -70,7 +70,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasCloud();
     }
 
-    public function cloud(): ?Filesystem
+    public function cloud(): ?FilesystemAdapter
     {
         if (! $this->hasCloud()) {
             return null;

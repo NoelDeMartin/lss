@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Support\Facades\Sparql;
 use App\Support\Serializers\TurtleSerializer;
 use EasyRdf\Graph;
-use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Filesystem\FilesystemAdapter;
 use League\Flysystem\UnableToReadFile;
 
 class SolidService
@@ -119,10 +119,21 @@ class SolidService
                 abort(404);
             }
 
-            $turtle .= '<> a <http://www.w3.org/ns/ldp#Container> .';
+            $turtle .= "\n<> a <http://www.w3.org/ns/ldp#Container> .";
 
+            $date = now();
             foreach ($this->children($path) as $child) {
-                $turtle .= "\n<> <http://www.w3.org/ns/ldp#contains> <$path$child> .";
+                $name = $child['name'];
+                $lastModifiedTime = $child['last_modified'];
+
+                $turtle .= "\n<> <http://www.w3.org/ns/ldp#contains> <$path$name>";
+
+                if (! is_null($lastModifiedTime)) {
+                    $lastModifiedDate = $date->setTimestamp($child['last_modified'])->toISOString();
+
+                    $turtle .= "\n<$path$name> <http://purl.org/dc/terms/modified> \"$lastModifiedDate\"^^<http://www.w3.org/2001/XMLSchema#dateTime> .";
+                    $turtle .= "\n<$path$name> <http://www.w3.org/ns/posix/stat#modified> $lastModifiedTime .";
+                }
             }
 
             return $turtle;
@@ -155,19 +166,29 @@ class SolidService
 
     protected function children(string $path): array
     {
-        $files = [];
+        $children = [];
+        $files = $this->cloud()->getDriver()->listContents($this->preparePath($path));
 
-        foreach ($this->cloud()->files($this->preparePath($path)) as $file) {
-            $files[] = basename($file);
+        foreach ($files as $i => $file) {
+            $filename = basename($file->path());
+
+            if (str_starts_with($filename, '.')) {
+                continue;
+            }
+
+            if ($file->isDir()) {
+                $filename .= '/';
+            } else {
+                $filename = substr($filename, 0, strlen($filename) - 4);
+            }
+
+            $children[] = [
+                'name' => $filename,
+                'last_modified' => $file->lastModified(),
+            ];
         }
 
-        foreach ($this->cloud()->directories($this->preparePath($path)) as $directory) {
-            $files[] = basename($directory).'/';
-        }
-
-        $files = array_filter($files, fn ($filename) => ! str_starts_with($filename, '.'));
-
-        return array_map(fn ($file) => str_ends_with($file, '/') ? $file : substr($file, 0, strlen($file) - 4), $files);
+        return $children;
     }
 
     protected function preparePath(string $path): string
@@ -182,6 +203,10 @@ class SolidService
         if (is_null($this->user)) {
             $this->user = User::whereUsername(request()->username())->first();
 
+            if (is_null($this->user)) {
+                abort(404);
+            }
+
             if (! $this->user->hasCloud()) {
                 abort(400, 'Cloud configuration missing.');
             }
@@ -190,7 +215,7 @@ class SolidService
         return $this->user;
     }
 
-    protected function cloud(): Filesystem
+    protected function cloud(): FilesystemAdapter
     {
         if (is_null($this->cloud)) {
             $this->cloud = $this->user()->cloud();

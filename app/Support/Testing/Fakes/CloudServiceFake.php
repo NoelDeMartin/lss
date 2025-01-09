@@ -4,7 +4,6 @@ namespace App\Support\Testing\Fakes;
 
 use App\Models\User;
 use App\Services\CloudService;
-use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Testing\Fakes\Fake;
 use League\Flysystem\Filesystem as LeagueFilesystem;
@@ -21,7 +20,7 @@ class CloudServiceFake extends CloudService implements Fake
         $this->filesystem = new FilesystemAdapter(new LeagueFilesystem($adapter), $adapter);
     }
 
-    public function forUser(?User $user = null): Filesystem
+    public function forUser(?User $user = null): FilesystemAdapter
     {
         return $this->filesystem;
     }

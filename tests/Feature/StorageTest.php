@@ -79,6 +79,7 @@ it('reads containers', function () {
     $response->assertSee('rdfs:label "Movies"', false);
     $response->assertSee('<> a <http://www.w3.org/ns/ldp#Container>', false);
     $response->assertSee('<http://www.w3.org/ns/ldp#contains> </movies/spirited-away>', false);
+    $response->assertSee('</movies/spirited-away> <http://purl.org/dc/terms/modified>', false);
     $response->assertSee('<http://www.w3.org/ns/ldp#contains> </movies/action/>', false);
 });
 
