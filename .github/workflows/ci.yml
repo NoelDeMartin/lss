@@ -11,21 +11,10 @@ jobs:
           php-version: 8.3
           extensions: json, dom, curl, libxml, mbstring
           coverage: none
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-      - name: Create Database
-        run: |
-          sudo systemctl start mysql
-          mysql --user="root" --password="root" -e "CREATE DATABASE \`testing\` character set UTF8mb4 collate utf8mb4_bin;"
       - name: Prepare The Environment
-        run: cp .env.ci .env
+        run: cp .env.example .env
       - name: Install Composer Dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
-      - name: Install Node dependencies and build assets
-        run: |
-          npm ci
-          npm run build
       - name: Generate Keys
         run: |
           php artisan key:generate
