@@ -22,7 +22,9 @@ test('OIDC flow', function () {
     $redirectUri = $response->json('redirect_uris')[0];
 
     // Request code.
-    $user = User::factory()->create();
+    Cloud::fake();
+
+    $user = User::factory()->nextcloud()->create();
     $username = $user->username;
     $state = Str::random(40);
     $codeVerifier = Str::random(128);
@@ -56,7 +58,38 @@ test('OIDC flow', function () {
     $response->assertJson(fn (AssertableJson $json) => $json->hasAll(['id_token', 'token_type', 'expires_in', 'access_token', 'refresh_token']));
 
     $token = JWT::parse($response->json('id_token'));
-    expect($token->isRelatedTo("http://$username.localhost/profile/card#me"))->toBeTrue();
+    expect($token->isRelatedTo("http://$username.localhost:8000/profile/card#me"))->toBeTrue();
+});
+
+it('prompts to configure Cloud', function () {
+    // Register client.
+    $response = $this->post('/.oidc/register', [
+        'client_name' => 'Umai',
+        'redirect_uris' => ['https://umai.noeldemartin.com'],
+    ]);
+
+    $response->assertStatus(201);
+    $response->assertJson(fn (AssertableJson $json) => $json->hasAll(['client_id', 'client_name', 'redirect_uris']));
+
+    $clientId = $response->json('client_id');
+    $redirectUri = $response->json('redirect_uris')[0];
+
+    // Request code.
+    $user = User::factory()->create();
+    $state = Str::random(40);
+    $codeVerifier = Str::random(128);
+    $codeChallenge = strtr(rtrim(base64_encode(hash('sha256', $codeVerifier, true)), '='), '+/', '-_');
+    $query = http_build_query([
+        'client_id' => $clientId,
+        'redirect_uri' => $redirectUri,
+        'response_type' => 'code',
+        'state' => $state,
+        'code_challenge' => $codeChallenge,
+        'code_challenge_method' => 'S256',
+    ]);
+    $response = $this->actingAs($user, 'web')->get("/.oidc/authorize?$query");
+
+    $response->assertRedirect(route('cloud.create'));
 });
 
 it('exposes public keys', function () {

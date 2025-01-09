@@ -64,6 +64,11 @@ class User extends Authenticatable implements MustVerifyEmail
             && ! empty($this->nextcloud_password);
     }
 
+    public function hasScopes(): bool
+    {
+        return $this->hasCloud();
+    }
+
     public function cloud(): ?Filesystem
     {
         if (! $this->hasCloud()) {

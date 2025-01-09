@@ -1,0 +1,29 @@
+--- /dev/null
++++ ../src/Http/Controllers/AuthorizationController.php
+@@ -97,6 +97,10 @@
+         $user = $this->guard->user();
+         $client = $clients->find($authRequest->getClient()->getIdentifier());
+ 
++        if (! $user->hasScopes($scopes)) {
++            return $this->promptForScopes($request);
++        }
++
+         if ($request->get('prompt') !== 'consent' &&
+             ($client->skipsAuthorization() || $this->hasValidToken($tokens, $user, $client, $scopes))) {
+             return $this->approveRequest($authRequest, $user);
+@@ -216,5 +220,15 @@
+         $request->session()->put('promptedForLogin', true);
+ 
+         throw new AuthenticationException;
++    }
++
++    protected function promptForScopes($request) {
++        $intended = $request->isMethod('GET') && $request->route() && ! $request->expectsJson()
++            ? url()->full()
++            : url()->previous();
++
++        return redirect()
++            ->setIntendedUrl($intended)
++            ->route('cloud.create');
+     }
+ }

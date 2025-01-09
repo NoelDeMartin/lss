@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CloudController;
 use App\Http\Controllers\OidcController;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
@@ -20,4 +21,8 @@ Route::withoutMiddleware([VerifyCsrfToken::class])->group(function () {
     })->name('oidc.config');
     Route::post('.oidc/register', [OidcController::class, 'register'])->name('oidc.register');
     Route::get('.oidc/jwks', [OidcController::class, 'jwks'])->name('oidc.jwks');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::resource('cloud', CloudController::class)->only(['create', 'store']);
 });
