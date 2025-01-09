@@ -10,8 +10,8 @@ class SparqlService
     public function updateTurtle(string $turtle, string $update, array $options = []): string
     {
         $base = $options['base'] ?? '/';
-        $baseUri = url($base).(str_ends_with($base, '/') ? '/' : '');
-        $graph = new Graph($baseUri);
+        $document = $options['document'] ?? '/';
+        $graph = new Graph(url($document).(str_ends_with($document, '/') ? '/' : ''));
         $serializer = new TurtleSerializer;
         $count = preg_match_all('/(?:(INSERT|DELETE) DATA {([^}]*)}\s*;?)/si', $update, $matches);
 
@@ -21,7 +21,10 @@ class SparqlService
             $this->applyOperation(strtolower($matches[1][$i]), $matches[2][$i], $graph);
         }
 
-        return $serializer->serialise($graph, 'turtle', ['implicit' => $baseUri]);
+        return $serializer->serialise($graph, 'turtle', [
+            'implicit_base' => $base,
+            'implicit_document' => $document,
+        ]);
     }
 
     protected function applyOperation(string $operation, string $turtle, Graph $graph): void

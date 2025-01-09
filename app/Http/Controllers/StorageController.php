@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Support\Facades\Solid;
 use App\Support\Facades\Sparql;
 use Illuminate\Support\Facades\Auth;
@@ -44,7 +45,7 @@ class StorageController extends Controller
 
     public function update()
     {
-        $this->authenticate();
+        $user = $this->authenticate();
 
         if (request()->header('Content-Type') !== 'application/sparql-update') {
             abort(400, 'Invalid content type, expected application/sparql-update');
@@ -58,13 +59,16 @@ class StorageController extends Controller
 
             return response('', 200);
         } catch (NotFoundHttpException $e) {
-            Solid::create($path, Sparql::updateTurtle('', $sparql, ['base' => $path]));
+            Solid::create($path, Sparql::updateTurtle('', $sparql, [
+                'base' => $user->url(),
+                'document' => $user->url($path),
+            ]));
 
             return response('', 201);
         }
     }
 
-    private function authenticate(): void
+    private function authenticate(): User
     {
         $username = request()->username();
 
@@ -77,5 +81,7 @@ class StorageController extends Controller
         if (is_null($user) || $user->username !== $username) {
             abort(401);
         }
+
+        return $user;
     }
 }

@@ -7,6 +7,7 @@ use App\Support\Facades\Sparql;
 use App\Support\Serializers\TurtleSerializer;
 use EasyRdf\Graph;
 use Illuminate\Contracts\Filesystem\Filesystem;
+use League\Flysystem\UnableToReadFile;
 
 class SolidService
 {
@@ -55,7 +56,10 @@ class SolidService
 
         $this->cloud()->put(
             $this->preparePath("$path.ttl"),
-            Sparql::updateTurtle($turtle, $sparql, ['base' => $this->user()->url($path)])
+            Sparql::updateTurtle($turtle, $sparql, [
+                'base' => $this->user()->url(),
+                'document' => $this->user()->url($path),
+            ]),
         );
     }
 
@@ -77,9 +81,13 @@ class SolidService
 
         $graph->parse($turtle, 'turtle');
         $this->updateGraphProperty($graph, "$base#me", 'foaf:name', $user->name);
-        $user->cloud()->put("/{$user->cloud_folder}/profile/card.ttl", $serialiser->serialise($graph, 'turtle', [
-            'implicit' => $base,
-        ]));
+        $user->cloud()->put(
+            "/{$user->cloud_folder}/profile/card.ttl",
+            $serialiser->serialise($graph, 'turtle', [
+                'implicit_base' => $user->url(),
+                'implicit_document' => $user->url('/profile/card'),
+            ]),
+        );
     }
 
     protected function updateGraphProperty(Graph $graph, string $resource, string $property, string $value): void
@@ -104,19 +112,23 @@ class SolidService
 
     protected function readContainer(string $path): string
     {
-        $turtle = $this->cloud()->get($this->preparePath("$path.meta.ttl")) ?? '';
+        try {
+            $turtle = $this->cloud()->get($this->preparePath("$path.meta.ttl")) ?? '';
 
-        if (empty($turtle) && ! $this->cloud()->exists($this->preparePath($path))) {
+            if (empty($turtle) && ! $this->cloud()->exists($this->preparePath($path))) {
+                abort(404);
+            }
+
+            $turtle .= '<> a <http://www.w3.org/ns/ldp#Container> .';
+
+            foreach ($this->children($path) as $child) {
+                $turtle .= "\n<> <http://www.w3.org/ns/ldp#contains> <$path$child> .";
+            }
+
+            return $turtle;
+        } catch (UnableToReadFile $e) {
             abort(404);
         }
-
-        $turtle .= '<> a <http://www.w3.org/ns/ldp#Container> .';
-
-        foreach ($this->children($path) as $child) {
-            $turtle .= "\n<> <http://www.w3.org/ns/ldp#contains> <$path$child> .";
-        }
-
-        return $turtle;
     }
 
     protected function createDocument(string $path, string $turtle): void

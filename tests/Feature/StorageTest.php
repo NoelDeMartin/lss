@@ -83,15 +83,16 @@ it('reads containers', function () {
 });
 
 it('updates documents', function () {
-    $response = $this->authenticated()->sparqlUpdate('/profile/card', '
+    $user = User::factory()->nextcloud()->create();
+    $response = $this->authenticated($user)->sparqlUpdate('/profile/card', "
         INSERT DATA {
-            <http://localhost/profile/card#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <http://localhost/settings/privateTypeIndex> .
+            <{$user->url('/profile/card#me')}> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <{$user->url('/settings/privateTypeIndex')}> .
         }
-    ');
+    ");
 
     $response->assertStatus(200);
     $this->cloud->assertContains('/Solid/profile/card.ttl', '<#me>');
-    $this->cloud->assertContains('/Solid/profile/card.ttl', 'privateTypeIndex <http://localhost/settings/privateTypeIndex>');
+    $this->cloud->assertContains('/Solid/profile/card.ttl', 'privateTypeIndex </settings/privateTypeIndex>');
 });
 
 it('creates documents using PUT', function () {

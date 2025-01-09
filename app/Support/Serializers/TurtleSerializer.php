@@ -11,14 +11,25 @@ class TurtleSerializer extends Turtle
     {
         $turtle = parent::serialise($graph, $format, $options);
 
-        if (isset($options['implicit'])) {
-            $escapedUrl = preg_quote($options['implicit'], '/');
+        if (isset($options['implicit_document'])) {
+            $turtle = $this->replacePrefix($turtle, $options['implicit_document']);
+        }
 
-            preg_match_all("/<{$escapedUrl}([^>]*)>/", $turtle, $matches);
+        if (isset($options['implicit_base'])) {
+            $turtle = $this->replacePrefix($turtle, $options['implicit_base'], '/');
+        }
 
-            foreach ($matches[0] as $i => $match) {
-                $turtle = str_replace($match, "<{$matches[1][$i]}>", $turtle);
-            }
+        return $turtle;
+    }
+
+    protected function replacePrefix(string $turtle, string $prefix, string $default = ''): string {
+        $escapedPrefix = preg_quote($prefix, '/');
+
+        preg_match_all("/<{$escapedPrefix}([^>]*)>/", $turtle, $matches);
+
+        foreach ($matches[0] as $i => $match) {
+            $replacement = $matches[1][$i] ?? $default;
+            $turtle = str_replace($match, "<{$replacement}>", $turtle);
         }
 
         return $turtle;

@@ -16,9 +16,9 @@ abstract class TestCase extends BaseTestCase
         return $this;
     }
 
-    public function authenticated()
+    public function authenticated(?User $user = null)
     {
-        $user = User::factory()->nextcloud()->create();
+        $user ??= User::factory()->nextcloud()->create();
 
         return $this->forUserDomain($user)->actingAs($user, 'solid');
     }

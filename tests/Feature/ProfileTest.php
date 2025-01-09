@@ -130,7 +130,6 @@ it('updates cloud profile', function () {
         ->assertSessionHasNoErrors()
         ->assertRedirect('/account/profile');
 
-    $cloud->assertContains('/Solid/profile/card.ttl', $user->url());
     $cloud->assertContains('/Solid/profile/card.ttl', '<#me>');
     $cloud->assertContains('/Solid/profile/card.ttl', 'foaf:name "Updated name"');
     $cloud->assertDoesntContain('/Solid/profile/card.ttl', "foaf:name \"{$originalName}\"");
