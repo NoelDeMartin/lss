@@ -22,7 +22,8 @@ class TurtleSerializer extends Turtle
         return $turtle;
     }
 
-    protected function replacePrefix(string $turtle, string $prefix, string $default = ''): string {
+    protected function replacePrefix(string $turtle, string $prefix, string $default = ''): string
+    {
         $escapedPrefix = preg_quote($prefix, '/');
 
         preg_match_all("/<{$escapedPrefix}([^>]*)>/", $turtle, $matches);
