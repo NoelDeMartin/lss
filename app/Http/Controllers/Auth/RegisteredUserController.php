@@ -19,6 +19,10 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
+        if (app()->isProduction()) {
+            return view('auth.register_disabled');
+        }
+
         return view('auth.register');
     }
 
@@ -29,6 +33,10 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        if (app()->isProduction()) {
+            abort(500, 'Registrations are disabled for now');
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'alpha_num:ascii', 'max:100', 'unique:'.User::class],
