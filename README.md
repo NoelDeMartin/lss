@@ -3,6 +3,9 @@
 > [!WARNING]
 > This is **very experimental**, in fact it's nothing more than a proof of concept. So please refrain from reporting any bugs or feature requests. But feel free to look around and ask questions for educational purposes.
 
+> [!NOTE]
+> I am running an instance at [lss.noeldemartin.com](https://lss.noeldemartin.com/), but registrations are disabled at the moment. If you're interested in giving it a try, [let me know](mailto:hey@noeldemartin.com) and maybe I will create an account for you :).
+
 LSS (Laravel Solid Server) is a [Solid server](https://solidproject.org) built with [Laravel](https://laravel.com/).
 
 Currently, it's just a proof of concept and it doesn't support most of the hairy stuff (ACLs, content negotiation, etc.). But the basic CRUD operations and authentication are implemented, and it already works with a couple of apps like [Ramen](https://ramen.noeldemartin.com) and [Focus](https://focus.noeldemartin.com).
@@ -31,4 +34,5 @@ cd lss
 ./lss install
 ./lss permissions
 ./lss start
+nginx-agora start
 ```
