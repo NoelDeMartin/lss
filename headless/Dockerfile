@@ -5,7 +5,7 @@ WORKDIR /app
 # Install PHP dependencies
 RUN set -x \
     && apk update \
-    && apk add zlib-dev libzip-dev patch \
+    && apk add zlib-dev libzip-dev patch vim \
     && docker-php-ext-install zip bcmath \
     && docker-php-ext-enable bcmath \
     && php -r "readfile('http://getcomposer.org/installer');" | php -- --install-dir=/usr/bin/ --filename=composer
