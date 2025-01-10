@@ -1,0 +1,17 @@
+services:
+    app:
+        image: noeldemartin/lss
+        volumes:
+            - ./database/database.sqlite:/app/database/database.sqlite
+            - ./storage:/app/storage
+            - ./.env:/app/.env
+        restart: unless-stopped
+        networks:
+            default:
+                aliases:
+                    - lss
+
+networks:
+    default:
+        name: nginx-agora
+        external: true

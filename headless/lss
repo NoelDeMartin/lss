@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+function lss-docker-compose() {
+    docker compose -f $base_dir/docker-compose.yml $@
+}
+
+function lss-cli() {
+    $base_dir/lss $@
+}
+
+function lss_is_running() {
+    if [ -z $(lss-docker-compose ps --quiet | head -n 1) ]; then
+        false
+    fi
+}
+
+export base_dir=`cd $(readlink -f $0 | xargs dirname) && pwd`
+export scripts_dir="$base_dir/scripts"
+export -f lss-docker-compose
+export -f lss-cli
+export -f lss_is_running
+
+command=$1
+
+case "$command" in
+    'help' | '' )
+        echo 'lss install          | initialize app files'
+        echo 'lss start            | start app services'
+        echo 'lss restart          | restart app services'
+        echo 'lss stop             | stop app services'
+        echo 'lss update           | update app and restart'
+        echo 'lss permissions      | set file permissions'
+        echo 'lss shell {service?} | open shell in a running container'
+        echo 'lss docker-compose   | run docker-compose command'
+        ;;
+    'stop' )
+        lss-docker-compose down
+        ;;
+    'restart' )
+        lss-cli stop
+        lss-cli start
+        ;;
+    'docker-compose' )
+        lss-docker-compose ${@:2}
+        ;;
+    'install' | 'start' | 'update' | 'permissions' | 'shell' )
+        $scripts_dir/$command.sh ${@:2}
+        ;;
+    * )
+        echo "Unknown command '$command'"
+        ;;
+esac
