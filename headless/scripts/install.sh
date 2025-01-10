@@ -42,6 +42,7 @@ touch database/database.sqlite
 # Prepare storage
 lss-cli permissions
 lss-docker-compose run --rm app php artisan key:generate
+lss-docker-compose run --rm app php artisan passport:keys
 lss-docker-compose run --rm app php artisan config:cache
 lss-docker-compose run --rm app php artisan event:cache
 lss-docker-compose run --rm app php artisan optimize

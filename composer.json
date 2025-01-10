@@ -15,7 +15,8 @@
         "league/flysystem-memory": "^3.28",
         "league/flysystem-webdav": "^3.28",
         "sabre/dav": "^4.6",
-        "strobotti/php-jwk": "^1.4"
+        "strobotti/php-jwk": "^1.4",
+        "symfony/filesystem": "^7.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
