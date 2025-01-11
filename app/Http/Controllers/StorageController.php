@@ -15,6 +15,10 @@ class StorageController extends Controller
         $path = request()->getPathInfo();
 
         if ($path === '/' && ! request()->wantsTurtle()) {
+            if (Auth::check()) {
+                return redirect()->route('dashboard');
+            }
+
             return view('welcome');
         }
 

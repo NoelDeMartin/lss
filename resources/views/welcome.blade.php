@@ -19,7 +19,7 @@
                 <span class="mr-4">=</span>
                 <x-icons.love class="size-32" />
             </div>
-            <div class="mt-10 flex items-center gap-x-6">
+            <div class="mt-10">
                 <a
                     href="{{ route('login') }}"
                     class="rounded-md bg-[#6437e3] px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#7c4dff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6437e3]"
