@@ -28,11 +28,13 @@ class SolidService
 
     public function read(string $path): string
     {
-        if (str_ends_with($path, '/')) {
-            return $this->readContainer($path);
+        $turtle = str_ends_with($path, '/') ? $this->readContainer($path) : $this->readDocument($path);
+
+        if (is_null($turtle)) {
+            abort(404);
         }
 
-        return $this->readDocument($path);
+        return $turtle;
     }
 
     public function create(string $path, string $turtle): void
@@ -48,7 +50,7 @@ class SolidService
 
     public function update(string $path, string $sparql): void
     {
-        if (! $this->cloud()->exists($this->preparePath("$path.ttl"))) {
+        if (! $this->pathExists("$path.ttl")) {
             abort(404);
         }
 
@@ -101,50 +103,53 @@ class SolidService
         $graph->addLiteral($resource, $property, $value);
     }
 
-    protected function readDocument(string $path): string
-    {
-        if (! $this->cloud()->exists($this->preparePath("$path.ttl"))) {
-            abort(404);
-        }
-
-        return $this->cloud()->get($this->preparePath("$path.ttl"));
-    }
-
-    protected function readContainer(string $path): string
+    protected function readDocument(string $path): ?string
     {
         try {
-            $turtle = $this->cloud()->get($this->preparePath("$path.meta.ttl")) ?? '';
+            $turtle = $this->cloud()->get($this->preparePath("$path.ttl"));
 
-            if (empty($turtle) && ! $this->cloud()->exists($this->preparePath($path))) {
-                abort(404);
+            if (empty($turtle) && ! $this->pathExists("$path.ttl")) {
+                return null;
             }
 
-            $turtle .= "\n<> a <http://www.w3.org/ns/ldp#Container> .";
-
-            $date = now();
-            foreach ($this->children($path) as $child) {
-                $name = $child['name'];
-                $lastModifiedTime = $child['last_modified'];
-
-                $turtle .= "\n<> <http://www.w3.org/ns/ldp#contains> <$path$name> .";
-
-                if (! is_null($lastModifiedTime)) {
-                    $lastModifiedDate = $date->setTimestamp($child['last_modified'])->toISOString();
-
-                    $turtle .= "\n<$path$name> <http://purl.org/dc/terms/modified> \"$lastModifiedDate\"^^<http://www.w3.org/2001/XMLSchema#dateTime> .";
-                    $turtle .= "\n<$path$name> <http://www.w3.org/ns/posix/stat#modified> $lastModifiedTime .";
-                }
-            }
-
-            return $turtle;
+            return $turtle ?? '';
         } catch (UnableToReadFile $e) {
-            abort(404);
+            return null;
         }
+    }
+
+    protected function readContainer(string $path): ?string
+    {
+        $turtle = $this->readDocument("$path.meta");
+
+        if (is_null($turtle) && ! $this->pathExists($path)) {
+            return null;
+        }
+
+        $turtle ??= '';
+        $turtle .= "\n<> a <http://www.w3.org/ns/ldp#Container> .";
+
+        $date = now();
+        foreach ($this->children($path) as $child) {
+            $name = $child['name'];
+            $lastModifiedTime = $child['last_modified'];
+
+            $turtle .= "\n<> <http://www.w3.org/ns/ldp#contains> <$path$name> .";
+
+            if (! is_null($lastModifiedTime)) {
+                $lastModifiedDate = $date->setTimestamp($child['last_modified'])->toISOString();
+
+                $turtle .= "\n<$path$name> <http://purl.org/dc/terms/modified> \"$lastModifiedDate\"^^<http://www.w3.org/2001/XMLSchema#dateTime> .";
+                $turtle .= "\n<$path$name> <http://www.w3.org/ns/posix/stat#modified> $lastModifiedTime .";
+            }
+        }
+
+        return $turtle;
     }
 
     protected function createDocument(string $path, string $turtle): void
     {
-        if ($this->cloud()->exists($this->preparePath("$path.ttl"))) {
+        if ($this->pathExists("$path.ttl")) {
             abort(409, 'Already exists');
         }
 
@@ -155,13 +160,21 @@ class SolidService
 
     protected function createContainer(string $path, string $turtle): void
     {
-        if ($this->cloud()->exists($this->preparePath($path))) {
+        if ($this->pathExists($path)) {
             abort(409, 'Already exists');
         }
 
         // TODO ensure directory exists
 
         $this->cloud()->put($this->preparePath("$path.meta.ttl"), $turtle);
+    }
+
+    protected function pathExists($path): bool {
+        try {
+            return $this->cloud()->exists($this->preparePath($path));
+        } catch (UnableToReadFile) {
+            return false;
+        }
     }
 
     protected function children(string $path): array
