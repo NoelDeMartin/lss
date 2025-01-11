@@ -169,7 +169,8 @@ class SolidService
         $this->cloud()->put($this->preparePath("$path.meta.ttl"), $turtle);
     }
 
-    protected function pathExists($path): bool {
+    protected function pathExists($path): bool
+    {
         try {
             return $this->cloud()->exists($this->preparePath($path));
         } catch (UnableToReadFile) {
