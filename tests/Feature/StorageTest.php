@@ -34,6 +34,7 @@ beforeEach(function () {
             terms:created "2021-09-03T14:40:00Z"^^XML:dateTime ;
             terms:modified "2021-09-03T14:40:00Z"^^XML:dateTime .
     ');
+    $filesystem->put('/Solid/movies/spirited-away.jpg', 'SPIRITED AWAY IMAGE');
     $filesystem->put('/Solid/movies/action/.meta.ttl', '<> rdfs:label "Action Movies" .');
 });
 
@@ -41,11 +42,11 @@ it('requires authentication', function () {
     $this->forUserDomain($this->user);
 
     // The profile is the only publicly readable document.
-    $this->readTurtle('/profile/card')->assertStatus(200);
+    $this->getTurtle('/profile/card')->assertStatus(200);
 
     // Everything else requires authentication.
-    $this->readTurtle('/movies/')->assertStatus(401);
-    $this->readTurtle('/movies/spirited-away')->assertStatus(401);
+    $this->getTurtle('/movies/')->assertStatus(401);
+    $this->getTurtle('/movies/spirited-away')->assertStatus(401);
     $this->sparqlUpdate('/profile/card', '')->assertStatus(401);
     $this->putTurtle('/profile/card', '')->assertStatus(401);
     $this->putTurtle('/settings/privateTypeIndex', '')->assertStatus(401);
@@ -53,11 +54,11 @@ it('requires authentication', function () {
 
 it('negotiates content in root', function () {
     $this->get('/')->assertSee('LSS');
-    $this->authenticated()->readTurtle('/')->assertSee('<> a <http://www.w3.org/ns/ldp#Container>', false);
+    $this->authenticated()->getTurtle('/')->assertSee('<> a <http://www.w3.org/ns/ldp#Container>', false);
 });
 
 it('reads profile', function () {
-    $response = $this->forUserDomain($this->user)->readTurtle('/profile/card');
+    $response = $this->forUserDomain($this->user)->getTurtle('/profile/card');
 
     $response->assertStatus(200);
     $response->assertHeader('Content-Type', 'text/turtle; charset=UTF-8');
@@ -66,7 +67,7 @@ it('reads profile', function () {
 });
 
 it('reads documents', function () {
-    $response = $this->authenticated()->readTurtle('/movies/spirited-away');
+    $response = $this->authenticated()->getTurtle('/movies/spirited-away');
 
     $response->assertStatus(200);
     $response->assertHeader('Content-Type', 'text/turtle; charset=UTF-8');
@@ -74,8 +75,16 @@ it('reads documents', function () {
     $response->assertValidTurtle();
 });
 
+it('reads binaries', function () {
+    $response = $this->authenticated()->getFile('/movies/spirited-away.jpg');
+
+    $response->assertStatus(200);
+    $response->assertHeader('Content-Type', 'image/jpeg');
+    $response->assertSee('SPIRITED AWAY IMAGE');
+});
+
 it('reads containers', function () {
-    $response = $this->authenticated()->readTurtle('/movies/');
+    $response = $this->authenticated()->getTurtle('/movies/');
 
     $response->assertStatus(200);
     $response->assertSee('<http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Movies"', false);
@@ -104,6 +113,13 @@ it('creates documents using PUT', function () {
 
     $response->assertStatus(201);
     $this->cloud->assertContains('/Solid/settings/privateTypeIndex.ttl', '<> a <http://www.w3.org/ns/solid/terms#TypeIndex> .');
+});
+
+it('creates binaries using PUT', function () {
+    $response = $this->authenticated()->putFile('/profile/avatar.jpg', 'AVATAR');
+
+    $response->assertStatus(201);
+    $this->cloud->assertContains('/Solid/profile/avatar.jpg', 'AVATAR');
 });
 
 it('creates documents using PATCH', function () {

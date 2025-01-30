@@ -28,21 +28,21 @@ class StorageController extends Controller
 
         return response(Solid::read($path))
             ->header('WAC-Allow', 'user="read control write"')
-            ->header('Content-Type', 'text/turtle');
+            ->header('Content-Type', Solid::mimeType($path));
     }
 
     public function create()
     {
         $this->authenticate();
 
-        if (request()->header('Content-Type') !== 'text/turtle') {
+        $path = request()->getPathInfo();
+        $content = request()->getContent();
+
+        if (request()->header('Content-Type') !== 'text/turtle' && str_ends_with($path, '/')) {
             abort(400, 'Invalid content type, expected text/turtle');
         }
 
-        $path = request()->getPathInfo();
-        $turtle = request()->getContent();
-
-        Solid::create($path, $turtle);
+        Solid::create($path, $content);
 
         return response('', 201);
     }

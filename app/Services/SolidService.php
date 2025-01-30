@@ -8,6 +8,7 @@ use App\Support\Serializers\TurtleSerializer;
 use EasyRdf\Graph;
 use Illuminate\Filesystem\FilesystemAdapter;
 use League\Flysystem\UnableToReadFile;
+use Symfony\Component\Mime\MimeTypes;
 
 class SolidService
 {
@@ -28,41 +29,51 @@ class SolidService
 
     public function read(string $path): string
     {
-        $turtle = str_ends_with($path, '/') ? $this->readContainer($path) : $this->readDocument($path);
+        $content = str_ends_with($path, '/') ? $this->readContainer($path) : $this->readDocument($path);
 
-        if (is_null($turtle)) {
+        if (is_null($content)) {
             abort(404);
         }
 
-        return $turtle;
+        return $content;
     }
 
-    public function create(string $path, string $turtle): void
+    public function create(string $path, string $content): void
     {
         if (str_ends_with($path, '/')) {
-            $this->createContainer($path, $turtle);
+            $this->createContainer($path, $content);
 
             return;
         }
 
-        $this->createDocument($path, $turtle);
+        $this->createDocument($path, $content);
     }
 
     public function update(string $path, string $sparql): void
     {
-        if (! $this->pathExists("$path.ttl")) {
+        if (! $this->filePathExists($path)) {
             abort(404);
         }
 
-        $turtle = $this->cloud()->get($this->preparePath("$path.ttl"));
+        $content = $this->cloud()->get($this->prepareFilePath($path));
 
         $this->cloud()->put(
-            $this->preparePath("$path.ttl"),
-            Sparql::updateTurtle($turtle, $sparql, [
+            $this->prepareFilePath($path),
+            Sparql::updateTurtle($content, $sparql, [
                 'base' => $this->user()->url(),
                 'document' => $this->user()->url($path),
             ]),
         );
+    }
+
+    public function mimeType(string $path): string
+    {
+        return MimeTypes::getDefault()->getMimeTypes($this->getExtension($path))[0] ?? 'text/turtle';
+    }
+
+    protected function getExtension(string $path): string
+    {
+        return pathinfo($path, PATHINFO_EXTENSION);
     }
 
     protected function createProfile(User $user): void
@@ -106,14 +117,14 @@ class SolidService
     protected function readDocument(string $path): ?string
     {
         try {
-            $turtle = $this->cloud()->get($this->preparePath("$path.ttl"));
+            $content = $this->cloud()->get($this->prepareFilePath($path));
 
-            if (empty($turtle) && ! $this->pathExists("$path.ttl")) {
+            if (empty($content) && ! $this->filePathExists($path)) {
                 return null;
             }
 
-            return $turtle ?? '';
-        } catch (UnableToReadFile $e) {
+            return $content ?? '';
+        } catch (UnableToReadFile) {
             return null;
         }
     }
@@ -147,15 +158,15 @@ class SolidService
         return $turtle;
     }
 
-    protected function createDocument(string $path, string $turtle): void
+    protected function createDocument(string $path, string $content): void
     {
-        if ($this->pathExists("$path.ttl")) {
+        if ($this->filePathExists($path)) {
             abort(409, 'Already exists');
         }
 
         // TODO ensure directory exists
 
-        $this->cloud()->put($this->preparePath("$path.ttl"), $turtle);
+        $this->cloud()->put($this->prepareFilePath($path), $content);
     }
 
     protected function createContainer(string $path, string $turtle): void
@@ -166,13 +177,22 @@ class SolidService
 
         // TODO ensure directory exists
 
-        $this->cloud()->put($this->preparePath("$path.meta.ttl"), $turtle);
+        $this->cloud()->put($this->prepareFilePath("$path.meta"), $turtle);
     }
 
     protected function pathExists($path): bool
     {
         try {
             return $this->cloud()->exists($this->preparePath($path));
+        } catch (UnableToReadFile) {
+            return false;
+        }
+    }
+
+    protected function filePathExists($path): bool
+    {
+        try {
+            return $this->cloud()->exists($this->prepareFilePath($path));
         } catch (UnableToReadFile) {
             return false;
         }
@@ -210,6 +230,17 @@ class SolidService
         $user = $this->user();
 
         return "/{$user->cloud_folder}$path";
+    }
+
+    protected function prepareFilePath(string $path): string
+    {
+        $extension = $this->getExtension($path);
+
+        if (empty($extension) || $extension === 'meta') {
+            $path .= '.ttl';
+        }
+
+        return $this->preparePath($path);
     }
 
     protected function user(): User

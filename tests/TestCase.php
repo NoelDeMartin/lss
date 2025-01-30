@@ -23,11 +23,18 @@ abstract class TestCase extends BaseTestCase
         return $this->forUserDomain($user)->actingAs($user, 'solid');
     }
 
-    public function readTurtle(string $path)
+    public function getTurtle(string $path)
     {
         $this->prepareServerVariables();
 
         return $this->get($path, ['Accept' => 'text/turtle']);
+    }
+
+    public function getFile(string $path)
+    {
+        $this->prepareServerVariables();
+
+        return $this->get($path);
     }
 
     public function putTurtle(string $path, string $turtle)
@@ -37,6 +44,13 @@ abstract class TestCase extends BaseTestCase
         $server = $this->transformHeadersToServerVars(['Content-Type' => 'text/turtle']);
 
         return $this->call('PUT', $path, [], [], [], $server, $turtle);
+    }
+
+    public function putFile(string $path, string $content)
+    {
+        $this->prepareServerVariables();
+
+        return $this->call('PUT', $path, [], [], [], [], $content);
     }
 
     public function sparqlUpdate(string $path, string $sparql)
