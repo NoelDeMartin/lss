@@ -19,6 +19,7 @@
         "symfony/filesystem": "^7.2"
     },
     "require-dev": {
+        "aaronfrancis/solo": "^0.2.2",
         "fakerphp/faker": "^1.23",
         "larastan/larastan": "^2.0",
         "laravel/breeze": "^2.1",
