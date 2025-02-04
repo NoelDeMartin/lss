@@ -20,6 +20,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected static $urlGenerator = null;
 
     public $cloud_folder = 'Solid';
+    public $cloudSyncFailed = false;
 
     protected $cloud = null;
 
