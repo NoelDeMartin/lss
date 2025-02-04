@@ -38,7 +38,7 @@ class StorageController extends Controller
             return view('welcome');
         }
 
-        if ($path !== '/profile/card') {
+        if (! preg_match('/^\/profile\/(card|avatar\.(pn|jpe?)g)$/', $path)) {
             $this->authenticate();
         }
 
