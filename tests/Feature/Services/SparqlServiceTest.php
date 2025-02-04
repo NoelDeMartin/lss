@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use App\Support\Facades\Sparql;
 
 it('inserts triples', function () {
@@ -21,6 +22,28 @@ it('inserts triples', function () {
     expect($updated)->toContain('<https://alice.com/profile/card#me>');
     expect($updated)->toContain(':privateTypeIndex');
     expect($updated)->toContain('<https://alice.com/settings/privateTypeIndex>');
+});
+
+it('respects relative paths', function () {
+    // Arrange.
+    $base = User::factory()->create()->url();
+    $turtle = '';
+    $sparql = '
+        INSERT DATA {
+            @prefix schema: <https://schema.org/> .
+
+            <#me> schema:imageUrl </cookbook/ramen.jpg> .
+        }
+    ';
+
+    // Act.
+    $updated = Sparql::updateTurtle($turtle, $sparql, [
+        'base' => $base,
+        'document' => "{$base}/cookbook/ramen",
+    ]);
+
+    // Assert.
+    expect($updated)->toContain('</cookbook/ramen.jpg>');
 });
 
 it('deletes triples', function () {

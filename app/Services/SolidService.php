@@ -38,15 +38,13 @@ class SolidService
         return $content;
     }
 
-    public function create(string $path, string $content): void
+    public function create(string $path, string $content, array $options = []): array
     {
         if (str_ends_with($path, '/')) {
-            $this->createContainer($path, $content);
-
-            return;
+            return $this->createContainer($path, $content, $options);
         }
 
-        $this->createDocument($path, $content);
+        return $this->createDocument($path, $content, $options);
     }
 
     public function update(string $path, string $sparql): void
@@ -158,26 +156,36 @@ class SolidService
         return $turtle;
     }
 
-    protected function createDocument(string $path, string $content): void
+    protected function createDocument(string $path, string $content, array $options = []): array
     {
-        if ($this->filePathExists($path)) {
+        $overwrite = $options['overwrite'] ?? false;
+        $existed = $this->filePathExists($path);
+
+        if (! $overwrite && $existed) {
             abort(409, 'Already exists');
         }
 
         // TODO ensure directory exists
 
         $this->cloud()->put($this->prepareFilePath($path), $content);
+
+        return ['status' => $existed ? 200 : 201];
     }
 
-    protected function createContainer(string $path, string $turtle): void
+    protected function createContainer(string $path, string $turtle, array $options = []): array
     {
-        if ($this->pathExists($path)) {
+        $overwrite = $options['overwrite'] ?? false;
+        $existed = $this->pathExists($path);
+
+        if (! $overwrite && $existed) {
             abort(409, 'Already exists');
         }
 
         // TODO ensure directory exists
 
         $this->cloud()->put($this->prepareFilePath("{$path}.meta"), $turtle);
+
+        return ['status' => $existed ? 200 : 201];
     }
 
     protected function pathExists($path): bool

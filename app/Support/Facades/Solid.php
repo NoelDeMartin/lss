@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Facade;
 /**
  * @method static void syncProfile(User $user);
  * @method static string read(string $path);
- * @method static void create(string $path, string $content);
+ * @method static array create(string $path, string $content);
  * @method static void update(string $path, string $sparql);
  * @method static string mimeType(string $path);
  *

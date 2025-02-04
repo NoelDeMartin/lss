@@ -122,6 +122,13 @@ it('creates binaries using PUT', function () {
     $this->cloud->assertContains('/Solid/profile/avatar.jpg', 'AVATAR');
 });
 
+it('overrides binaries using PUT', function () {
+    $response = $this->authenticated()->putFile('/movies/spirited-away.jpg', 'NEW DATA');
+
+    $response->assertStatus(200);
+    $this->cloud->assertContains('/Solid/movies/spirited-away.jpg', 'NEW DATA');
+});
+
 it('creates documents using PATCH', function () {
     $response = $this->authenticated()->sparqlUpdate('/settings/privateTypeIndex', '
         INSERT DATA {

@@ -21,9 +21,9 @@ class StorageController extends Controller
             abort(400, 'Invalid content type, expected text/turtle');
         }
 
-        Solid::create($path, $content);
+        $result = Solid::create($path, $content, ['overwrite' => true]);
 
-        return response('', 201);
+        return response('', $result['status']);
     }
 
     public function show()

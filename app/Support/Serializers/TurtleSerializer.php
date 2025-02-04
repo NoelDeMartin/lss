@@ -30,6 +30,11 @@ class TurtleSerializer extends Turtle
 
         foreach ($matches[0] as $i => $match) {
             $replacement = $matches[1][$i] ?? $default;
+
+            if ($replacement !== $default && ! preg_match('/^[\/#]/', $replacement)) {
+                continue;
+            }
+
             $turtle = str_replace($match, "<{$replacement}>", $turtle);
         }
 
