@@ -29,10 +29,9 @@ php artisan serve --host=localhost
 ## Production
 
 ```sh
-git clone https://github.com/NoelDeMartin/lss.git lss --branch headless
+git clone https://github.com/NoelDeMartin/lss.git lss --branch kanjuro --single-branch
 cd lss
-./lss install
-./lss permissions
-./lss start
+kanjuro install
+kanjuro start
 nginx-agora start
 ```

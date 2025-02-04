@@ -9,14 +9,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Set env
+        run: echo "GITHUB_REPOSITORY_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
       - name: Login
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
         run: docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
       - name: Prepare
-        run: mv headless/Dockerfile ./
+        run: mv kanjuro/Dockerfile ./
       - name: Build
-        run: docker build . --tag ${{ secrets.DOCKERHUB_USERNAME }}/lss:$(git rev-parse HEAD)
-      - name: Push
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/lss:$(git rev-parse HEAD)
+        run: docker build . --tag ${{ secrets.DOCKERHUB_USERNAME }}/$GITHUB_REPOSITORY_NAME:$GITHUB_SHA
+      - name: Push commit tag
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/$GITHUB_REPOSITORY_NAME:$GITHUB_SHA
+      - name: Push latest tag
+        run: |
+          docker tag ${{ secrets.DOCKERHUB_USERNAME }}/$GITHUB_REPOSITORY_NAME:$GITHUB_SHA ${{ secrets.DOCKERHUB_USERNAME }}/$GITHUB_REPOSITORY_NAME:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/$GITHUB_REPOSITORY_NAME:latest

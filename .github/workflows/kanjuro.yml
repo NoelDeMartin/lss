@@ -1,11 +1,11 @@
-name: Headless
+name: Kanjuro
 on:
   push:
     branches:
       - 'main'
 
 jobs:
-  update-headless:
+  update-kanjuro:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -13,5 +13,5 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: Update headless branch
-        run: ./.github/scripts/update-headless.sh
+      - name: Update kanjuro branch
+        run: ./.github/scripts/update-kanjuro.sh

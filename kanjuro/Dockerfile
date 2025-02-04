@@ -14,8 +14,8 @@ RUN set -x \
 RUN apk add --no-cache supervisor
 
 # Copy files
-COPY headless/supervisord.conf /etc/supervisord.conf
-RUN rm headless -rf
+COPY kanjuro/supervisord.conf /etc/supervisord.conf
+RUN rm kanjuro -rf
 COPY --chown="www-data:root" . /app
 
 # Install Composer dependencies
