@@ -93,7 +93,7 @@ class SolidService
         $serialiser = new TurtleSerializer;
 
         $graph->parse($turtle, 'turtle');
-        $this->updateGraphProperty($graph, "$base#me", 'foaf:name', $user->name);
+        $this->updateGraphProperty($graph, "{$base}#me", 'foaf:name', $user->name);
         $user->cloud()->put(
             "/{$user->cloud_folder}/profile/card.ttl",
             $serialiser->serialise($graph, 'turtle', [
@@ -131,7 +131,7 @@ class SolidService
 
     protected function readContainer(string $path): ?string
     {
-        $turtle = $this->readDocument("$path.meta");
+        $turtle = $this->readDocument("{$path}.meta");
 
         if (is_null($turtle) && ! $this->pathExists($path)) {
             return null;
@@ -145,13 +145,13 @@ class SolidService
             $name = $child['name'];
             $lastModifiedTime = $child['last_modified'];
 
-            $turtle .= "\n<> <http://www.w3.org/ns/ldp#contains> <$path$name> .";
+            $turtle .= "\n<> <http://www.w3.org/ns/ldp#contains> <{$path}{$name}> .";
 
             if (! is_null($lastModifiedTime)) {
                 $lastModifiedDate = $date->setTimestamp($child['last_modified'])->toISOString();
 
-                $turtle .= "\n<$path$name> <http://purl.org/dc/terms/modified> \"$lastModifiedDate\"^^<http://www.w3.org/2001/XMLSchema#dateTime> .";
-                $turtle .= "\n<$path$name> <http://www.w3.org/ns/posix/stat#modified> $lastModifiedTime .";
+                $turtle .= "\n<{$path}{$name}> <http://purl.org/dc/terms/modified> \"{$lastModifiedDate}\"^^<http://www.w3.org/2001/XMLSchema#dateTime> .";
+                $turtle .= "\n<{$path}{$name}> <http://www.w3.org/ns/posix/stat#modified> {$lastModifiedTime} .";
             }
         }
 
@@ -177,7 +177,7 @@ class SolidService
 
         // TODO ensure directory exists
 
-        $this->cloud()->put($this->prepareFilePath("$path.meta"), $turtle);
+        $this->cloud()->put($this->prepareFilePath("{$path}.meta"), $turtle);
     }
 
     protected function pathExists($path): bool

@@ -11,7 +11,7 @@ class SparqlService
     {
         $base = $options['base'] ?? '/';
         $document = $options['document'] ?? '/';
-        $graph = new Graph(url($document).(str_ends_with($document, '/') ? '/' : ''));
+        $graph = new Graph(url($document) . (str_ends_with($document, '/') ? '/' : ''));
         $serializer = new TurtleSerializer;
         $count = preg_match_all('/(?:(INSERT|DELETE) DATA {([^}]*)}\s*;?)/si', $update, $matches);
 
@@ -35,8 +35,8 @@ class SparqlService
 
         foreach ($operationGraph->resources() as $resource) {
             foreach ($resource->propertyUris() as $property) {
-                $literals = $resource->allLiterals("<$property>");
-                $resources = $resource->allResources("<$property>");
+                $literals = $resource->allLiterals("<{$property}>");
+                $resources = $resource->allResources("<{$property}>");
 
                 foreach ($literals as $value) {
                     $operation === 'insert'

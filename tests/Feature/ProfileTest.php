@@ -107,7 +107,7 @@ it('initializes cloud storage', function () {
         ->assertSessionHasNoErrors()
         ->assertRedirect('/account/profile');
 
-    $cloud->assertContains('/Solid/profile/card.ttl', "foaf:name \"$user->name\"");
+    $cloud->assertContains('/Solid/profile/card.ttl', "foaf:name \"{$user->name}\"");
 });
 
 it('updates cloud profile', function () {

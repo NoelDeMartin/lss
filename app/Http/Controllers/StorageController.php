@@ -10,6 +10,22 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class StorageController extends Controller
 {
+    public function create()
+    {
+        $this->authenticate();
+
+        $path = request()->getPathInfo();
+        $content = request()->getContent();
+
+        if (request()->header('Content-Type') !== 'text/turtle' && str_ends_with($path, '/')) {
+            abort(400, 'Invalid content type, expected text/turtle');
+        }
+
+        Solid::create($path, $content);
+
+        return response('', 201);
+    }
+
     public function show()
     {
         $path = request()->getPathInfo();
@@ -29,22 +45,6 @@ class StorageController extends Controller
         return response(Solid::read($path))
             ->header('WAC-Allow', 'user="read control write"')
             ->header('Content-Type', Solid::mimeType($path));
-    }
-
-    public function create()
-    {
-        $this->authenticate();
-
-        $path = request()->getPathInfo();
-        $content = request()->getContent();
-
-        if (request()->header('Content-Type') !== 'text/turtle' && str_ends_with($path, '/')) {
-            abort(400, 'Invalid content type, expected text/turtle');
-        }
-
-        Solid::create($path, $content);
-
-        return response('', 201);
     }
 
     public function update()

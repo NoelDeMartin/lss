@@ -1,8 +1,7 @@
 name: CI
 on: [push]
 jobs:
-
-  tests:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,8 +18,10 @@ jobs:
         run: |
           php artisan key:generate
           php artisan passport:keys
-      - name: Run Linting
-        run: ./vendor/bin/pint --test
+      - name: Run Duster Lint
+        uses: tighten/duster-action@v3
+        with:
+          args: lint
       - name: Run Static Analysis
         run: ./vendor/bin/phpstan analyse
       - name: Run Tests

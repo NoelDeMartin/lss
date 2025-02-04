@@ -75,10 +75,10 @@ class JWTService
     protected function makeCryptKey(string $type): CryptKey
     {
         // Code copied from Laravel\Passport\PassportServiceProvider.
-        $key = str_replace('\\n', "\n", config('passport.'.$type.'_key') ?? '');
+        $key = str_replace('\\n', "\n", config('passport.' . $type . '_key') ?? '');
 
         if (! $key) {
-            $key = 'file://'.Passport::keyPath('oauth-'.$type.'.key');
+            $key = 'file://' . Passport::keyPath('oauth-' . $type . '.key');
         }
 
         return new CryptKey($key, null, Passport::$validateKeyPermissions && ! windows_os());

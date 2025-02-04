@@ -46,7 +46,7 @@ class AppServiceProvider extends ServiceProvider
         Request::macro('username', function () {
             $parts = parse_url(config('app.url'));
 
-            preg_match('/'.preg_quote($parts['scheme']).'\:\/\/([^.]+)\.'.preg_quote($parts['host']).'/', $this->url(), $matches);
+            preg_match('/' . preg_quote($parts['scheme']) . '\:\/\/([^.]+)\.' . preg_quote($parts['host']) . '/', $this->url(), $matches);
 
             return $matches[1] ?? null;
         });

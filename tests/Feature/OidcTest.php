@@ -37,7 +37,7 @@ test('OIDC flow', function () {
         'code_challenge' => $codeChallenge,
         'code_challenge_method' => 'S256',
     ]);
-    $response = $this->actingAs($user, 'web')->get("/.oidc/authorize?$query");
+    $response = $this->actingAs($user, 'web')->get("/.oidc/authorize?{$query}");
 
     $response->assertRedirect();
 
@@ -58,7 +58,7 @@ test('OIDC flow', function () {
     $response->assertJson(fn (AssertableJson $json) => $json->hasAll(['id_token', 'token_type', 'expires_in', 'access_token', 'refresh_token']));
 
     $token = JWT::parse($response->json('id_token'));
-    expect($token->isRelatedTo("http://$username.localhost:8000/profile/card#me"))->toBeTrue();
+    expect($token->isRelatedTo("http://{$username}.localhost:8000/profile/card#me"))->toBeTrue();
 });
 
 it('prompts to configure Cloud', function () {
@@ -87,7 +87,7 @@ it('prompts to configure Cloud', function () {
         'code_challenge' => $codeChallenge,
         'code_challenge_method' => 'S256',
     ]);
-    $response = $this->actingAs($user, 'web')->get("/.oidc/authorize?$query");
+    $response = $this->actingAs($user, 'web')->get("/.oidc/authorize?{$query}");
 
     $response->assertRedirect(route('cloud.create'));
 });
@@ -118,7 +118,7 @@ it('uses DPoP headers to authenticate', function () {
         ->toString();
     $response = $this
         ->forUserDomain($user)
-        ->withHeader('Authorization', "DPoP $jwt")
+        ->withHeader('Authorization', "DPoP {$jwt}")
         ->putTurtle('/settings/privateTypeIndex', '<> a <http://www.w3.org/ns/solid/terms#TypeIndex> .');
 
     $response->assertStatus(201);

@@ -28,7 +28,8 @@
         "nunomaduro/collision": "^8.0",
         "pestphp/pest": "^2.0",
         "pestphp/pest-plugin-laravel": "^2.0",
-        "symplify/vendor-patches": "^11.3"
+        "symplify/vendor-patches": "^11.3",
+        "tightenco/duster": "^3.1"
     },
     "autoload": {
         "psr-4": {

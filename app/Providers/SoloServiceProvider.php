@@ -19,7 +19,7 @@ class SoloServiceProvider extends ServiceProvider
         Solo::useTheme('dark')
             ->addCommands([
                 'HTTP' => 'php artisan serve --host=localhost',
-                EnhancedTailCommand::make('Logs', 'tail -f -n 100 '.storage_path('logs/laravel.log')),
+                EnhancedTailCommand::make('Logs', 'tail -f -n 100 ' . storage_path('logs/laravel.log')),
                 'About' => 'php artisan solo:about',
             ]);
     }
