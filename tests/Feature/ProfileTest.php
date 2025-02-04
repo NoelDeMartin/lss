@@ -94,10 +94,7 @@ it('initializes cloud storage', function () {
 
     $response = $this
         ->actingAs($user)
-        ->patch('/account/profile', [
-            'name' => $user->name,
-            'username' => $user->username,
-            'email' => $user->email,
+        ->put('/cloud', [
             'nextcloud_url' => 'https://cloud.example.com',
             'nextcloud_username' => 'username',
             'nextcloud_password' => 'password',
@@ -121,9 +118,6 @@ it('updates cloud profile', function () {
             'name' => 'Updated name',
             'username' => $user->username,
             'email' => $user->email,
-            'nextcloud_url' => $user->nextcloud_url,
-            'nextcloud_username' => $user->nextcloud_username,
-            'nextcloud_password' => $user->nextcloud_password,
         ]);
 
     $response

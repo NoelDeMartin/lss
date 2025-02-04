@@ -83,6 +83,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->cloud;
     }
 
+    public function forgetCloud(): void
+    {
+        $this->cloud = null;
+    }
+
     public function url(string $path = ''): string
     {
         if (is_null(static::$urlGenerator)) {

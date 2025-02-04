@@ -1,6 +1,6 @@
 <x-guest-layout>
     <p class="mt-1 text-sm/6 text-gray-600">
-        {{ __('In order to continue, you need to configure your Nextcloud account. This will create a folder called "Solid" which will be used to store your POD data.') }}
+        {{ __('In order to continue, you need to configure your Nextcloud account. This will create a folder called "Solid" that will be used to store your POD data.') }}
     </p>
 
     <form method="POST" action="{{ route('cloud.store') }}">

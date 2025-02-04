@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\UserSaved;
 use App\Support\Facades\Solid;
+use Throwable;
 
 class SyncSolidProfile
 {
@@ -13,6 +14,10 @@ class SyncSolidProfile
             return;
         }
 
-        Solid::syncProfile($event->user);
+        try {
+            Solid::syncProfile($event->user);
+        } catch (Throwable) {
+            $event->user->cloudSyncFailed = true;
+        }
     }
 }
