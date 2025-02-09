@@ -8,16 +8,16 @@
     </head>
     <body class="font-sans antialiased flex flex-col min-h-full bg-gray-100">
         <main class="flex flex-col flex-grow items-center justify-center">
-            <div class="text-4xl flex items-center">
-                <a href="https://laravel.com" target="_blank" class="mr-4">
-                    <x-icons.laravel class="size-32" />
+            <div class="text-4xl flex flex-col items-center md:flex-row">
+                <a href="https://laravel.com" target="_blank" class="md:mr-4">
+                    <x-icons.laravel class="size-20 md:size-32" />
                 </a>
-                <span class="mr-2">+</span>
-                <a href="https://solidproject.org" target="_blank" class="mr-2">
-                    <x-icons.solid class="size-40" />
+                <span class="md:mr-2">+</span>
+                <a href="https://solidproject.org" target="_blank" class="md:mr-2">
+                    <x-icons.solid class="size-24 md:size-40" />
                 </a>
-                <span class="mr-4">=</span>
-                <x-icons.love class="size-32" />
+                <span class="md:mr-4">=</span>
+                <x-icons.love class="size-20 md:size-32" />
             </div>
             <div class="mt-10">
                 <a
