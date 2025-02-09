@@ -5,6 +5,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\HandleCors;
+use Illuminate\Routing\Exceptions\InvalidSignatureException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,5 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->replace(HandleCors::class, AppHandleCors::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (InvalidSignatureException $e) {
+            if (url()->signatureHasNotExpired(request())) {
+                return;
+            }
+
+            return response()->view('auth.verify-email', ['expired' => true]);
+        });
     })->create();
