@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CloudCreateRequest;
 use App\Http\Requests\CloudUpdateRequest;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\RedirectResponse;
 
 class CloudController extends Controller
 {
@@ -14,12 +16,15 @@ class CloudController extends Controller
 
     public function store(CloudCreateRequest $request)
     {
-        $request->user()->update($request->validated());
-
-        return redirect()->intended(route('dashboard', absolute: false));
+        return $this->updateCloud($request) ?? redirect()->intended(route('dashboard', absolute: false));
     }
 
     public function update(CloudUpdateRequest $request)
+    {
+        return $this->updateCloud($request) ?? redirect()->back()->with('status', 'cloud-updated');
+    }
+
+    private function updateCloud(FormRequest $request): ?RedirectResponse
     {
         $user = $request->user();
         $original = $user->getOriginal();
@@ -29,10 +34,11 @@ class CloudController extends Controller
         if ($user->cloudSyncFailed) {
             $user->forgetCloud();
             $user->update($original);
+            $request->flash();
 
-            return redirect()->route('profile.edit')->with('status', 'cloud-sync-failed');
+            return redirect()->back()->with('status', 'cloud-sync-failed');
         }
 
-        return redirect()->route('profile.edit')->with('status', 'cloud-updated');
+        return null;
     }
 }

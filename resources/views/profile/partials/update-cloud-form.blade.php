@@ -6,7 +6,7 @@
 
         @if (session('status') === 'cloud-sync-failed')
             <p class="mt-1 text-sm text-red-600">
-                {{ __('Synchronization failed, are you sure the credentials were correct?') }}
+                {{ __('It wasn\'t possible to connect to Nextcloud, are you sure the credentials were correct?') }}
             </p>
         @else
             <p class="mt-1 text-sm text-gray-600">

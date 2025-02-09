@@ -94,6 +94,7 @@ it('initializes cloud storage', function () {
 
     $response = $this
         ->actingAs($user)
+        ->withHeader('referer', '/account/profile')
         ->put('/cloud', [
             'nextcloud_url' => 'https://cloud.example.com',
             'nextcloud_username' => 'username',
