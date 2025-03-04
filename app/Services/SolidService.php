@@ -144,6 +144,14 @@ class SolidService
             $lastModifiedTime = $child['last_modified'];
 
             $turtle .= "\n<> <http://www.w3.org/ns/ldp#contains> <{$path}{$name}> .";
+            $turtle .= "\n<{$path}{$name}> a <http://www.w3.org/ns/ldp#Resource> .";
+
+            if (str_ends_with($name, '/')) {
+                $turtle .= "\n<{$path}{$name}> a <http://www.w3.org/ns/ldp#Container> .";
+                $turtle .= "\n<{$path}{$name}> a <http://www.w3.org/ns/ldp#BasicContainer> .";
+            } else {
+                $turtle .= "\n<{$path}{$name}> a <http://www.w3.org/ns/iana/media-types/text/turtle#Resource> .";
+            }
 
             if (! is_null($lastModifiedTime)) {
                 $lastModifiedDate = $date->setTimestamp($child['last_modified'])->toISOString();
