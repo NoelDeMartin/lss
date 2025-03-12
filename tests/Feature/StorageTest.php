@@ -93,6 +93,10 @@ it('reads containers', function () {
     $response->assertSee('</movies/spirited-away> a <http://www.w3.org/ns/ldp#Resource>', false);
     $response->assertSee('</movies/spirited-away> a <http://www.w3.org/ns/iana/media-types/text/turtle#Resource>', false);
     $response->assertSee('</movies/spirited-away> <http://purl.org/dc/terms/modified>', false);
+    $response->assertSee('<http://www.w3.org/ns/ldp#contains> </movies/spirited-away.jpg>', false);
+    $response->assertSee('</movies/spirited-away.jpg> a <http://www.w3.org/ns/ldp#Resource>', false);
+    $response->assertSee('</movies/spirited-away.jpg> a <http://www.w3.org/ns/iana/media-types/image/jpeg#Resource>', false);
+    $response->assertSee('</movies/spirited-away.jpg> <http://purl.org/dc/terms/modified>', false);
     $response->assertSee('<http://www.w3.org/ns/ldp#contains> </movies/action/>', false);
     $response->assertSee('</movies/action/> a <http://www.w3.org/ns/ldp#Resource>', false);
     $response->assertSee('</movies/action/> a <http://www.w3.org/ns/ldp#Container>', false);

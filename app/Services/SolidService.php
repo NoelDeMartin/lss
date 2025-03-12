@@ -149,7 +149,11 @@ class SolidService
             if (str_ends_with($name, '/')) {
                 $turtle .= "\n<{$path}{$name}> a <http://www.w3.org/ns/ldp#Container> .";
                 $turtle .= "\n<{$path}{$name}> a <http://www.w3.org/ns/ldp#BasicContainer> .";
-            } else {
+            } elseif (str_ends_with($name, '.jpg') || str_ends_with($name, '.jpeg')) {
+                $turtle .= "\n<{$path}{$name}> a <http://www.w3.org/ns/iana/media-types/image/jpeg#Resource> .";
+            } elseif (str_ends_with($name, '.png')) {
+                $turtle .= "\n<{$path}{$name}> a <http://www.w3.org/ns/iana/media-types/image/png#Resource> .";
+            } elseif (! str_contains($name, '.')) {
                 $turtle .= "\n<{$path}{$name}> a <http://www.w3.org/ns/iana/media-types/text/turtle#Resource> .";
             }
 
@@ -219,7 +223,7 @@ class SolidService
         $children = [];
         $files = $this->cloud()->getDriver()->listContents($this->preparePath($path));
 
-        foreach ($files as $i => $file) {
+        foreach ($files as $file) {
             $filename = basename($file->path());
 
             if (str_starts_with($filename, '.')) {
@@ -228,7 +232,7 @@ class SolidService
 
             if ($file->isDir()) {
                 $filename .= '/';
-            } else {
+            } elseif (str_ends_with($filename, '.ttl')) {
                 $filename = substr($filename, 0, strlen($filename) - 4);
             }
 
