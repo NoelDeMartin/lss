@@ -14,13 +14,14 @@ class StorageController extends Controller
     {
         $this->authenticate();
 
+        $contentType = request()->header('Content-Type');
         $path = request()->getPathInfo();
-        $content = request()->getContent();
 
-        if (request()->header('Content-Type') !== 'text/turtle' && str_ends_with($path, '/')) {
+        if ($contentType !== 'text/turtle' && str_ends_with($path, '/')) {
             abort(400, 'Invalid content type, expected text/turtle');
         }
 
+        $content = str_starts_with($contentType, 'image/')  ? file_get_contents('php://input') : request()->getContent() ;
         $result = Solid::create($path, $content, ['overwrite' => true]);
 
         return response('', $result['status']);
