@@ -21,7 +21,7 @@ class StorageController extends Controller
             abort(400, 'Invalid content type, expected text/turtle');
         }
 
-        $content = str_starts_with($contentType, 'image/')  ? file_get_contents('php://input') : request()->getContent() ;
+        $content = str_starts_with($contentType, 'image/') ? file_get_contents('php://input') : request()->getContent();
         $result = Solid::create($path, $content, ['overwrite' => true]);
 
         return response('', $result['status']);
