@@ -8,7 +8,7 @@
         "php": "^8.2",
         "cweagans/composer-patches": "^1.7",
         "easyrdf/easyrdf": "^1.1",
-        "laravel/framework": "^11.9",
+        "laravel/framework": "^12.0",
         "laravel/passport": "^12.3",
         "laravel/tinker": "^2.9",
         "lcobucci/jwt": "^5.3",
@@ -20,15 +20,14 @@
         "symfony/filesystem": "^7.2"
     },
     "require-dev": {
-        "aaronfrancis/solo": "^0.2.2",
         "fakerphp/faker": "^1.23",
-        "larastan/larastan": "^2.0",
+        "larastan/larastan": "^3.0",
         "laravel/breeze": "^2.1",
         "laravel/pint": "^1.13",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.0",
-        "pestphp/pest": "^2.0",
-        "pestphp/pest-plugin-laravel": "^2.0",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "pestphp/pest": "^3.0",
         "symplify/vendor-patches": "^11.3",
         "tightenco/duster": "^3.1"
     },
