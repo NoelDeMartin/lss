@@ -2,6 +2,7 @@
 
 namespace App\Support\Facades;
 
+use App\Services\JWTService;
 use Illuminate\Support\Facades\Facade;
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Signer;
@@ -15,7 +16,7 @@ use Lcobucci\JWT\UnencryptedToken;
  * @method static Key signingKey();
  * @method static object jwk();
  *
- * @see \App\Services\JWTService
+ * @see JWTService
  */
 class JWT extends Facade
 {

@@ -3,6 +3,7 @@
 namespace App\Support\Facades;
 
 use App\Models\User;
+use App\Services\CloudService;
 use App\Support\Testing\Fakes\CloudServiceFake;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Facade;
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\Facade;
 /**
  * @method static Filesystem forUser(User $user);
  *
- * @see \App\Services\CloudService
+ * @see CloudService
  */
 class Cloud extends Facade
 {

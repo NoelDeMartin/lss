@@ -3,6 +3,7 @@
 namespace App\Support\Facades;
 
 use App\Models\User;
+use App\Services\SolidService;
 use Illuminate\Support\Facades\Facade;
 
 /**
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static array create(string $path, string $content, array $options = []);
  * @method static void update(string $path, string $sparql);
  *
- * @see \App\Services\SolidService
+ * @see SolidService
  */
 class Solid extends Facade
 {

@@ -1,6 +1,9 @@
 <?php
 
+use App\Providers\AppServiceProvider;
+use App\Providers\PassportServiceProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Providers\PassportServiceProvider::class,
+    AppServiceProvider::class,
+    PassportServiceProvider::class,
 ];

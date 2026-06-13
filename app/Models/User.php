@@ -42,7 +42,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * The event map for the model.
      *
-     * @var array<string, string>
+     * @var array<string, class-string>
      */
     protected $dispatchesEvents = [
         'saved' => UserSaved::class,
