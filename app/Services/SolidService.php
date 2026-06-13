@@ -7,6 +7,7 @@ use App\Support\Facades\Sparql;
 use App\Support\Serializers\TurtleSerializer;
 use EasyRdf\Graph;
 use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Support\Carbon;
 use League\Flysystem\UnableToReadFile;
 use Symfony\Component\Mime\MimeTypes;
 
@@ -27,15 +28,15 @@ class SolidService
         $this->updateProfile($user);
     }
 
-    public function read(string $path): string
+    public function read(string $path): array
     {
-        $content = str_ends_with($path, '/') ? $this->readContainer($path) : $this->readDocument($path);
+        $response = str_ends_with($path, '/') ? $this->readContainer($path) : $this->readDocument($path);
 
-        if (is_null($content)) {
+        if (is_null($response)) {
             abort(404);
         }
 
-        return $content;
+        return $response;
     }
 
     public function create(string $path, string $content, array $options = []): array
@@ -62,11 +63,6 @@ class SolidService
                 'document' => $this->user()->url($path),
             ]),
         );
-    }
-
-    public function mimeType(string $path): string
-    {
-        return MimeTypes::getDefault()->getMimeTypes($this->getExtension($path))[0] ?? 'text/turtle';
     }
 
     protected function getExtension(string $path): string
@@ -112,30 +108,35 @@ class SolidService
         $graph->addLiteral($resource, $property, $value);
     }
 
-    protected function readDocument(string $path): ?string
+    protected function readDocument(string $path): ?array
     {
         try {
-            $content = $this->cloud()->get($this->prepareFilePath($path));
+            $filePath = $this->prepareFilePath($path);
+            $content = $this->cloud()->get($filePath);
 
             if (empty($content) && ! $this->filePathExists($path)) {
                 return null;
             }
 
-            return $content ?? '';
+            return [
+                'content' => $content,
+                'mime_type' => MimeTypes::getDefault()->getMimeTypes($this->getExtension($path))[0] ?? 'text/turtle',
+                'last_modified' => Carbon::createFromTimestamp($this->cloud()->lastModified($filePath)),
+            ];
         } catch (UnableToReadFile) {
             return null;
         }
     }
 
-    protected function readContainer(string $path): ?string
+    protected function readContainer(string $path): ?array
     {
-        $turtle = $this->readDocument("{$path}.meta");
+        $response = $this->readDocument("{$path}.meta");
 
-        if (is_null($turtle) && ! $this->pathExists($path)) {
+        if (is_null($response) && ! $this->pathExists($path)) {
             return null;
         }
 
-        $turtle ??= '';
+        $turtle = $response['content'];
         $turtle .= "\n<> a <http://www.w3.org/ns/ldp#Container> .";
 
         $date = now();
@@ -165,7 +166,7 @@ class SolidService
             }
         }
 
-        return $turtle;
+        return ['content' => $turtle, 'mime_type' => 'text/turtle'];
     }
 
     protected function createDocument(string $path, string $content, array $options = []): array

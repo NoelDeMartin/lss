@@ -43,9 +43,16 @@ class StorageController extends Controller
             $this->authenticate();
         }
 
-        return response(Solid::read($path))
+        $file = Solid::read($path);
+        $response = response($file['content'])
             ->header('WAC-Allow', 'user="read control write"')
-            ->header('Content-Type', Solid::mimeType($path));
+            ->header('Content-Type', $file['mime_type']);
+
+        if (array_key_exists('last_modified', $file)) {
+            $response->header('Last-Modified', $file['last_modified']->toRfc7231String());
+        }
+
+        return $response;
     }
 
     public function update()

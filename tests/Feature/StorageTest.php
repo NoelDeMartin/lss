@@ -2,14 +2,15 @@
 
 use App\Models\User;
 use App\Support\Facades\Cloud;
+use Illuminate\Support\Carbon;
 
 beforeEach(function () {
     $this->cloud = Cloud::fake();
     $this->user = User::factory()->nextcloud()->create();
+    $this->filesystem = $this->cloud->forUser($this->user);
 
-    $filesystem = $this->cloud->forUser($this->user);
-    $filesystem->put('/Solid/.meta.ttl', '<> rdfs:label "Root" .');
-    $filesystem->put('/Solid/profile/card.ttl', '
+    $this->filesystem->put('/Solid/.meta.ttl', '<> rdfs:label "Root" .');
+    $this->filesystem->put('/Solid/profile/card.ttl', '
         @prefix foaf: <http://xmlns.com/foaf/0.1/>.
         @prefix solid: <http://www.w3.org/ns/solid/terms#>.
         @prefix pim: <http://www.w3.org/ns/pim/space#>.
@@ -20,8 +21,8 @@ beforeEach(function () {
             a foaf:Person;
             pim:storage </>.
     ');
-    $filesystem->put('/Solid/movies/.meta.ttl', '<> <http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Movies" .');
-    $filesystem->put('/Solid/movies/spirited-away.ttl', '
+    $this->filesystem->put('/Solid/movies/.meta.ttl', '<> <http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Movies" .');
+    $this->filesystem->put('/Solid/movies/spirited-away.ttl', '
         @prefix schema: <https://schema.org/> .
         @prefix ldp: <http://www.w3.org/ns/ldp#> .
         @prefix terms: <http://purl.org/dc/terms/> .
@@ -34,8 +35,8 @@ beforeEach(function () {
             terms:created "2021-09-03T14:40:00Z"^^XML:dateTime ;
             terms:modified "2021-09-03T14:40:00Z"^^XML:dateTime .
     ');
-    $filesystem->put('/Solid/movies/spirited-away.jpg', 'SPIRITED AWAY IMAGE');
-    $filesystem->put('/Solid/movies/action/.meta.ttl', '<> rdfs:label "Action Movies" .');
+    $this->filesystem->put('/Solid/movies/spirited-away.jpg', 'SPIRITED AWAY IMAGE');
+    $this->filesystem->put('/Solid/movies/action/.meta.ttl', '<> rdfs:label "Action Movies" .');
 });
 
 it('requires authentication', function () {
@@ -67,10 +68,12 @@ it('reads profile', function () {
 });
 
 it('reads documents', function () {
+    $lastModified = Carbon::createFromTimestamp($this->filesystem->lastModified('/Solid/movies/spirited-away.ttl'));
     $response = $this->authenticated()->getTurtle('/movies/spirited-away');
 
     $response->assertStatus(200);
     $response->assertHeader('Content-Type', 'text/turtle; charset=UTF-8');
+    $response->assertHeader('Last-Modified', $lastModified->toRfc7231String());
     $response->assertSee('a schema:Movie');
     $response->assertValidTurtle();
 });
