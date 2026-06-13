@@ -37,6 +37,14 @@ beforeEach(function () {
     ');
     $this->filesystem->put('/Solid/movies/spirited-away.jpg', 'SPIRITED AWAY IMAGE');
     $this->filesystem->put('/Solid/movies/action/.meta.ttl', '<> rdfs:label "Action Movies" .');
+
+    $this->filesystem->put('/Solid/shows/freaks-and-geeks.ttl', '
+        @prefix schema: <https://schema.org/> .
+
+        <#it>
+            a schema:TVSeries ;
+            schema:name "Freaks and Geeks" .
+    ');
 });
 
 it('requires authentication', function () {
@@ -104,6 +112,18 @@ it('reads containers', function () {
     $response->assertSee('</movies/action/> a <http://www.w3.org/ns/ldp#Resource>', false);
     $response->assertSee('</movies/action/> a <http://www.w3.org/ns/ldp#Container>', false);
     $response->assertSee('</movies/action/> a <http://www.w3.org/ns/ldp#BasicContainer>', false);
+    $response->assertValidTurtle();
+});
+
+it('reads containers without .meta', function () {
+    $response = $this->authenticated()->getTurtle('/shows/');
+
+    $response->assertStatus(200);
+    $response->assertSee('<> a <http://www.w3.org/ns/ldp#Container>', false);
+    $response->assertSee('<http://www.w3.org/ns/ldp#contains> </shows/freaks-and-geeks>', false);
+    $response->assertSee('</shows/freaks-and-geeks> a <http://www.w3.org/ns/ldp#Resource>', false);
+    $response->assertSee('</shows/freaks-and-geeks> a <http://www.w3.org/ns/iana/media-types/text/turtle#Resource>', false);
+    $response->assertSee('</shows/freaks-and-geeks> <http://purl.org/dc/terms/modified>', false);
     $response->assertValidTurtle();
 });
 

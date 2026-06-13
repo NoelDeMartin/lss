@@ -136,7 +136,7 @@ class SolidService
             return null;
         }
 
-        $turtle = $response['content'];
+        $turtle = $response['content'] ?? '';
         $turtle .= "\n<> a <http://www.w3.org/ns/ldp#Container> .";
 
         $date = now();
