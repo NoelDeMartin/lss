@@ -10,7 +10,7 @@ use League\OAuth2\Server\ResponseTypes\BearerTokenResponse as BaseBearerTokenRes
 
 class BearerTokenResponse extends BaseBearerTokenResponse
 {
-    protected function getExtraParams(AccessTokenEntityInterface $accessToken)
+    protected function getExtraParams(AccessTokenEntityInterface $accessToken): array
     {
         return [
             'id_token' => $this->getIdToken($accessToken),

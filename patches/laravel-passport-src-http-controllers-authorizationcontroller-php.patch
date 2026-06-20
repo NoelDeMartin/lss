@@ -1,21 +1,23 @@
---- /dev/null
-+++ ../src/Http/Controllers/AuthorizationController.php
-@@ -97,6 +97,10 @@
-         $user = $this->guard->user();
-         $client = $clients->find($authRequest->getClient()->getIdentifier());
+diff --git a/src/Http/Controllers/AuthorizationController.php b/src/Http/Controllers/AuthorizationController.php
+index 2123cbe..31866db 100644
+--- a/src/Http/Controllers/AuthorizationController.php
++++ b/src/Http/Controllers/AuthorizationController.php
+@@ -79,6 +79,11 @@ class AuthorizationController
+         $authRequest->setUser(new User($user->getAuthIdentifier()));
  
+         $scopes = $this->parseScopes($authRequest);
++
 +        if (! $user->hasScopes($scopes)) {
 +            return $this->promptForScopes($request);
 +        }
 +
-         if ($request->get('prompt') !== 'consent' &&
-             ($client->skipsAuthorization() || $this->hasValidToken($tokens, $user, $client, $scopes))) {
-             return $this->approveRequest($authRequest, $user);
-@@ -216,5 +220,15 @@
-         $request->session()->put('promptedForLogin', true);
+         $client = $this->clients->find($authRequest->getClient()->getIdentifier());
  
-         throw new AuthenticationException;
-+    }
+         if ($prompt->doesntContain('consent') &&
+@@ -167,4 +172,14 @@ class AuthorizationController
+ 
+         throw new AuthenticationException(guards: isset($this->guard->name) ? [$this->guard->name] : []);
+     }
 +
 +    protected function promptForScopes($request) {
 +        $intended = $request->isMethod('GET') && $request->route() && ! $request->expectsJson()
@@ -25,5 +27,5 @@
 +        return redirect()
 +            ->setIntendedUrl($intended)
 +            ->route('cloud.create');
-     }
++    }
  }

@@ -3,22 +3,35 @@
 namespace App\Auth\Guards;
 
 use App\Support\Facades\JWT;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
+use Laravel\Passport\AccessToken;
+use Laravel\Passport\Contracts\OAuthenticatable;
 use Laravel\Passport\Guards\TokenGuard as BaseTokenGuard;
+use Laravel\Passport\Token;
 
 class TokenGuard extends BaseTokenGuard
 {
-    public function user()
+    public function user(): ?Authenticatable
     {
         if (! is_null($this->user)) {
-            return $this->user;
+            /** @var OAuthenticatable|null $user */
+            $user = $this->user;
+
+            return $user;
         }
 
         if ($this->usingDPoP($this->request)) {
-            return $this->user = $this->authenticateViaDPoP($this->request);
+            $user = $this->authenticateViaDPoP($this->request);
+
+            /** @var OAuthenticatable|null $user */
+            return $this->user = $user;
         }
 
-        return parent::user();
+        /** @var OAuthenticatable|null $user */
+        $user = parent::user();
+
+        return $user;
     }
 
     protected function usingDPoP(Request $request): bool
@@ -33,6 +46,11 @@ class TokenGuard extends BaseTokenGuard
         // TODO this is probably naive, we should validate the signatures, check DPoP header, etc.
         $jwt = JWT::parse(substr($request->header('Authorization'), 5));
         $clientId = $jwt->claims()->get('aud');
+
+        if (is_array($clientId)) {
+            $clientId = $clientId[0] ?? null;
+        }
+
         $userId = $jwt->claims()->get('sub');
         $accessToken = $jwt->claims()->get('jti');
 
@@ -58,9 +76,19 @@ class TokenGuard extends BaseTokenGuard
         // Next, we will assign a token instance to this user which the developers may use
         // to determine if the token has a given scope, etc. This will be useful during
         // authorization such as within the developer's Laravel model policy classes.
-        $token = $this->tokens->find($accessToken);
+        $token = Token::find($accessToken);
 
-        // @phpstan-ignore ternary.alwaysTrue
-        return $token ? $user->withAccessToken($token) : null;
+        if ($token) {
+            $accessTokenInstance = new AccessToken([
+                'oauth_access_token_id' => $token->id,
+                'oauth_scopes' => $token->scopes,
+                'oauth_user_id' => $token->user_id,
+                'oauth_client_id' => $token->client_id,
+            ]);
+
+            return $user->withAccessToken($accessTokenInstance);
+        }
+
+        return null;
     }
 }

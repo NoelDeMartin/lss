@@ -2,10 +2,10 @@
 
 use App\Http\Controllers\CloudController;
 use App\Http\Controllers\OidcController;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Route;
 
-Route::withoutMiddleware([VerifyCsrfToken::class])->group(function () {
+Route::withoutMiddleware([PreventRequestForgery::class])->group(function () {
     Route::get('.well-known/openid-configuration', function () {
         return [
             'issuer' => route('home'),

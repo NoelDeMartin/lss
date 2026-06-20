@@ -33,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Passport::useClientModel(Client::class);
+        Passport::authorizationView('vendor.passport.authorize');
         Passport::tokensCan([
             'webid' => 'Log in using WebID',
             'openid' => 'Verify OpenID identity',

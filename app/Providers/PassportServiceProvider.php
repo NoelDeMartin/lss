@@ -12,12 +12,12 @@ use Laravel\Passport\ClientRepository;
 use Laravel\Passport\Passport;
 use Laravel\Passport\PassportServiceProvider as BasePassportServiceProvider;
 use Laravel\Passport\PassportUserProvider;
-use Laravel\Passport\TokenRepository;
 use League\OAuth2\Server\ResourceServer;
+use League\OAuth2\Server\ResponseTypes\ResponseTypeInterface;
 
 class PassportServiceProvider extends BasePassportServiceProvider
 {
-    public function makeAuthorizationServer()
+    public function makeAuthorizationServer(?ResponseTypeInterface $responseType = null): \League\OAuth2\Server\AuthorizationServer
     {
         return new AuthorizationServer(
             $this->app->make(ClientRepositoryBridge::class),
@@ -25,16 +25,15 @@ class PassportServiceProvider extends BasePassportServiceProvider
             $this->app->make(ScopeRepositoryBridge::class),
             $this->makeCryptKey('private'),
             app('encrypter')->getKey(),
-            Passport::$authorizationServerResponseType
+            $responseType ?? Passport::$authorizationServerResponseType
         );
     }
 
-    protected function makeGuard(array $config)
+    protected function makeGuard(array $config): \Laravel\Passport\Guards\TokenGuard
     {
         return new TokenGuard(
             $this->app->make(ResourceServer::class),
             new PassportUserProvider(Auth::createUserProvider($config['provider']), $config['provider']),
-            $this->app->make(TokenRepository::class),
             $this->app->make(ClientRepository::class),
             $this->app->make('encrypter'),
             $this->app->make('request')
