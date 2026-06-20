@@ -7,7 +7,6 @@ use App\Services\CloudService;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Testing\Fakes\Fake;
 use League\Flysystem\Filesystem as LeagueFilesystem;
-use League\Flysystem\InMemory\InMemoryFilesystemAdapter;
 
 class CloudServiceFake extends CloudService implements Fake
 {
