@@ -143,11 +143,12 @@ class SolidService
         foreach ($this->children($path) as $child) {
             $name = $child['name'];
             $lastModifiedTime = $child['last_modified'];
+            $isContainer = str_ends_with($name, '/');
 
             $turtle .= "\n<> <http://www.w3.org/ns/ldp#contains> <{$path}{$name}> .";
             $turtle .= "\n<{$path}{$name}> a <http://www.w3.org/ns/ldp#Resource> .";
 
-            if (str_ends_with($name, '/')) {
+            if ($isContainer) {
                 $turtle .= "\n<{$path}{$name}> a <http://www.w3.org/ns/ldp#Container> .";
                 $turtle .= "\n<{$path}{$name}> a <http://www.w3.org/ns/ldp#BasicContainer> .";
             } elseif (str_ends_with($name, '.jpg') || str_ends_with($name, '.jpeg')) {
@@ -163,10 +164,21 @@ class SolidService
 
                 $turtle .= "\n<{$path}{$name}> <http://purl.org/dc/terms/modified> \"{$lastModifiedDate}\"^^<http://www.w3.org/2001/XMLSchema#dateTime> .";
                 $turtle .= "\n<{$path}{$name}> <http://www.w3.org/ns/posix/stat#modified> {$lastModifiedTime} .";
+
+                if ($isContainer) {
+                    $turtle .= "\n<{$path}{$name}> <https://vocab.noeldemartin.com/fs/deepLastModified> \"{$lastModifiedDate}\"^^<http://www.w3.org/2001/XMLSchema#dateTime> .";
+                }
             }
         }
 
-        return ['content' => $turtle, 'mime_type' => 'text/turtle'];
+        $lastModified = Carbon::createFromTimestamp($this->cloud()->lastModified($this->preparePath($path)));
+
+        return [
+            'content' => $turtle,
+            'mime_type' => 'text/turtle',
+            'last_modified' => $lastModified,
+            'deep_last_modified' => $lastModified,
+        ];
     }
 
     protected function createDocument(string $path, string $content, array $options = []): array

@@ -95,6 +95,8 @@ it('reads binaries', function () {
 });
 
 it('reads containers', function () {
+    $lastModified = Carbon::createFromTimestamp($this->filesystem->lastModified('/Solid/movies/'));
+
     $response = $this->authenticated()->getTurtle('/movies/');
 
     $response->assertStatus(200);
@@ -112,6 +114,9 @@ it('reads containers', function () {
     $response->assertSee('</movies/action/> a <http://www.w3.org/ns/ldp#Resource>', false);
     $response->assertSee('</movies/action/> a <http://www.w3.org/ns/ldp#Container>', false);
     $response->assertSee('</movies/action/> a <http://www.w3.org/ns/ldp#BasicContainer>', false);
+    $response->assertSee('</movies/action/> <https://vocab.noeldemartin.com/fs/deepLastModified>', false);
+    $response->assertHeader('Last-Modified', $lastModified->toRfc7231String());
+    $response->assertHeader('Deep-Last-Modified', $lastModified->toRfc7231String());
     $response->assertValidTurtle();
 });
 
