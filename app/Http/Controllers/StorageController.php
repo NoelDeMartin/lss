@@ -52,10 +52,6 @@ class StorageController extends Controller
             $response->header('Last-Modified', $file['last_modified']->toRfc7231String());
         }
 
-        if (array_key_exists('deep_last_modified', $file)) {
-            $response->header('Deep-Last-Modified', $file['deep_last_modified']->toRfc7231String());
-        }
-
         return $response;
     }
 

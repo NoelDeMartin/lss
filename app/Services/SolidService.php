@@ -136,8 +136,10 @@ class SolidService
             return null;
         }
 
+        $lastModified = Carbon::createFromTimestamp($this->cloud()->lastModified($this->preparePath($path)));
         $turtle = $response['content'] ?? '';
         $turtle .= "\n<> a <http://www.w3.org/ns/ldp#Container> .";
+        $turtle .= "\n<> <https://vocab.noeldemartin.com/solid-extra/deepLastModified> \"{$lastModified->toISOString()}\"^^<http://www.w3.org/2001/XMLSchema#dateTime> .";
 
         $date = now();
         foreach ($this->children($path) as $child) {
@@ -166,18 +168,15 @@ class SolidService
                 $turtle .= "\n<{$path}{$name}> <http://www.w3.org/ns/posix/stat#modified> {$lastModifiedTime} .";
 
                 if ($isContainer) {
-                    $turtle .= "\n<{$path}{$name}> <https://vocab.noeldemartin.com/fs/deepLastModified> \"{$lastModifiedDate}\"^^<http://www.w3.org/2001/XMLSchema#dateTime> .";
+                    $turtle .= "\n<{$path}{$name}> <https://vocab.noeldemartin.com/solid-extra/deepLastModified> \"{$lastModifiedDate}\"^^<http://www.w3.org/2001/XMLSchema#dateTime> .";
                 }
             }
         }
-
-        $lastModified = Carbon::createFromTimestamp($this->cloud()->lastModified($this->preparePath($path)));
 
         return [
             'content' => $turtle,
             'mime_type' => 'text/turtle',
             'last_modified' => $lastModified,
-            'deep_last_modified' => $lastModified,
         ];
     }
 

@@ -41,7 +41,7 @@ return [
 
     'allowed_headers' => ['*'],
 
-    'exposed_headers' => ['WAC-Allow', 'Last-Modified', 'Deep-Last-Modified'],
+    'exposed_headers' => ['WAC-Allow', 'Last-Modified'],
 
     'max_age' => 0,
 

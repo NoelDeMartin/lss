@@ -102,6 +102,7 @@ it('reads containers', function () {
     $response->assertStatus(200);
     $response->assertSee('<http://www.w3.org/1999/02/22-rdf-syntax-ns#label> "Movies"', false);
     $response->assertSee('<> a <http://www.w3.org/ns/ldp#Container>', false);
+    $response->assertSee('<> <https://vocab.noeldemartin.com/solid-extra/deepLastModified>', false);
     $response->assertSee('<http://www.w3.org/ns/ldp#contains> </movies/spirited-away>', false);
     $response->assertSee('</movies/spirited-away> a <http://www.w3.org/ns/ldp#Resource>', false);
     $response->assertSee('</movies/spirited-away> a <http://www.w3.org/ns/iana/media-types/text/turtle#Resource>', false);
@@ -114,9 +115,8 @@ it('reads containers', function () {
     $response->assertSee('</movies/action/> a <http://www.w3.org/ns/ldp#Resource>', false);
     $response->assertSee('</movies/action/> a <http://www.w3.org/ns/ldp#Container>', false);
     $response->assertSee('</movies/action/> a <http://www.w3.org/ns/ldp#BasicContainer>', false);
-    $response->assertSee('</movies/action/> <https://vocab.noeldemartin.com/fs/deepLastModified>', false);
+    $response->assertSee('</movies/action/> <https://vocab.noeldemartin.com/solid-extra/deepLastModified>', false);
     $response->assertHeader('Last-Modified', $lastModified->toRfc7231String());
-    $response->assertHeader('Deep-Last-Modified', $lastModified->toRfc7231String());
     $response->assertValidTurtle();
 });
 
