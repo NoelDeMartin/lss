@@ -7,3 +7,5 @@ parameters:
         - app/
         - bootstrap/
         - routes/
+    excludePaths:
+        - bootstrap/cache

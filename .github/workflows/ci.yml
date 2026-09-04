@@ -53,9 +53,13 @@ jobs:
       - name: Install Dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
+      - name: Prepare The Environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
       - name: Lint PHP
         run: composer lint:check
 
       - name: Type check PHP
         run: composer types:check
-

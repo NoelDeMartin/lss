@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Auth\Guards\TokenGuard;
 use App\Auth\Server\AuthorizationServer;
+use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Passport\Bridge\AccessTokenRepository as AccessTokenRepositoryBridge;
 use Laravel\Passport\Bridge\ClientRepository as ClientRepositoryBridge;
@@ -25,7 +26,7 @@ class PassportServiceProvider extends BasePassportServiceProvider
             $this->app->make(AccessTokenRepositoryBridge::class),
             $this->app->make(ScopeRepositoryBridge::class),
             $this->makeCryptKey('private'),
-            app('encrypter')->getKey(),
+            Passport::tokenEncryptionKey($this->app->make(Encrypter::class)),
             $responseType ?? Passport::$authorizationServerResponseType
         );
     }
@@ -47,7 +48,7 @@ class PassportServiceProvider extends BasePassportServiceProvider
             $this->app->make(ResourceServer::class),
             new PassportUserProvider($userProvider, $providerName),
             $this->app->make(ClientRepository::class),
-            $this->app->make('encrypter'),
+            $this->app->make(Encrypter::class),
             $this->app->make('request')
         );
     }
