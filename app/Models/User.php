@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Events\UserSaved;
 use App\Support\Facades\Cloud;
+use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Filesystem\FilesystemAdapter;
@@ -16,14 +17,15 @@ use Laravel\Passport\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail, OAuthenticatable
 {
+    /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected static $urlGenerator = null;
+    protected static ?UrlGenerator $urlGenerator = null;
 
-    public $cloud_folder = 'Solid';
-    public $cloudSyncFailed = false;
+    public string $cloud_folder = 'Solid';
+    public bool $cloudSyncFailed = false;
 
-    protected $cloud = null;
+    protected ?FilesystemAdapter $cloud = null;
 
     /**
      * The attributes that are mass assignable.
@@ -79,7 +81,9 @@ class User extends Authenticatable implements MustVerifyEmail, OAuthenticatable
         }
 
         if (is_null($this->cloud)) {
-            $this->cloud = Cloud::forUser($this);
+            /** @var FilesystemAdapter|null $cloud */
+            $cloud = Cloud::forUser($this);
+            $this->cloud = $cloud;
         }
 
         return $this->cloud;
@@ -95,10 +99,18 @@ class User extends Authenticatable implements MustVerifyEmail, OAuthenticatable
         if (is_null(static::$urlGenerator)) {
             static::$urlGenerator = new UrlGenerator(new RouteCollection, request());
 
-            static::$urlGenerator->forceRootUrl(config('app.url'));
+            /** @var string|null $rootUrl */
+            $rootUrl = config('app.url');
+            static::$urlGenerator->forceRootUrl($rootUrl);
         }
 
-        return preg_replace('/https?\:\/\//', "$0{$this->username}.", static::$urlGenerator->to($path));
+        /** @var string $generatedUrl */
+        $generatedUrl = static::$urlGenerator->to($path);
+
+        /** @var string $result */
+        $result = preg_replace('/https?\:\/\//', "$0{$this->username}.", $generatedUrl);
+
+        return $result;
     }
 
     /**

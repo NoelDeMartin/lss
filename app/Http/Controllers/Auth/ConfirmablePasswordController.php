@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,9 +25,15 @@ class ConfirmablePasswordController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        /** @var User $user */
+        $user = $request->user();
+
+        /** @var string $password */
+        $password = $request->string('password')->value();
+
         if (! Auth::guard('web')->validate([
-            'email' => $request->user()->email,
-            'password' => $request->password,
+            'email' => $user->email,
+            'password' => $password,
         ])) {
             throw ValidationException::withMessages([
                 'password' => __('auth.password'),

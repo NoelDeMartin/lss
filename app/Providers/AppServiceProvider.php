@@ -45,7 +45,13 @@ class AppServiceProvider extends ServiceProvider
             return isset($acceptable[0]) && str_contains(strtolower($acceptable[0]), 'text/turtle');
         });
         Request::macro('username', function () {
-            $parts = parse_url(config('app.url'));
+            /** @var string|null $appUrl */
+            $appUrl = config('app.url');
+            $parts = is_string($appUrl) ? parse_url($appUrl) : false;
+
+            if ($parts === false || ! isset($parts['scheme'], $parts['host'])) {
+                return null;
+            }
 
             preg_match('/' . preg_quote($parts['scheme'], '/') . '\:\/\/([^.]+)\.' . preg_quote($parts['host'], '/') . '/', $this->url(), $matches);
 
@@ -54,7 +60,8 @@ class AppServiceProvider extends ServiceProvider
 
         if ($this->app->runningUnitTests()) {
             TestResponse::macro('assertValidTurtle', function () {
-                Assert::assertThat($this->content(), new IsTurtle($this->baseRequest->uri()));
+                $uri = ! is_null($this->baseRequest) ? $this->baseRequest->getRequestUri() : null;
+                Assert::assertThat($this->content(), new IsTurtle($uri));
             });
         }
     }

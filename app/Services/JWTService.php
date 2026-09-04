@@ -17,12 +17,14 @@ use Strobotti\JWK\KeyFactory;
 
 class JWTService
 {
-    private $config = null;
+    private ?Configuration $config = null;
 
     public function parse(string $jwt): UnencryptedToken
     {
+        /** @var non-empty-string $jwtString */
+        $jwtString = $jwt;
         $parser = new Parser(new JoseEncoder);
-        $token = $parser->parse($jwt);
+        $token = $parser->parse($jwtString);
 
         assert($token instanceof UnencryptedToken);
 
@@ -54,17 +56,21 @@ class JWTService
             'kid' => 'lss', // TODO this should change every time the keys are rotated.
         ]);
 
-        return json_decode($jwk);
+        $decoded = json_decode($jwk);
+
+        return is_object($decoded) ? $decoded : (object) $decoded;
     }
 
     protected function config(): Configuration
     {
         if (is_null($this->config)) {
             $privateKey = $this->makeCryptKey('private');
+            /** @var non-empty-string $keyContents */
+            $keyContents = $privateKey->getKeyContents();
 
             $this->config = Configuration::forAsymmetricSigner(
                 new Sha256,
-                InMemory::plainText($privateKey->getKeyContents(), $privateKey->getPassPhrase() ?? ''),
+                InMemory::plainText($keyContents, $privateKey->getPassPhrase() ?? ''),
                 InMemory::plainText('empty', 'empty')
             );
         }
@@ -75,7 +81,9 @@ class JWTService
     protected function makeCryptKey(string $type): CryptKey
     {
         // Code copied from Laravel\Passport\PassportServiceProvider.
-        $key = str_replace('\\n', "\n", config('passport.' . $type . '_key') ?? '');
+        /** @var string|null $passportKey */
+        $passportKey = config('passport.' . $type . '_key');
+        $key = is_string($passportKey) ? str_replace('\\n', "\n", $passportKey) : '';
 
         if (! $key) {
             $key = 'file://' . Passport::keyPath('oauth-' . $type . '.key');

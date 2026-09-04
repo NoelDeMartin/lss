@@ -41,10 +41,10 @@ class TokenGuard extends BaseTokenGuard
         return str_starts_with($header, 'DPoP ');
     }
 
-    protected function authenticateViaDPoP(Request $request)
+    protected function authenticateViaDPoP(Request $request): ?OAuthenticatable
     {
         // TODO this is probably naive, we should validate the signatures, check DPoP header, etc.
-        $jwt = JWT::parse(substr($request->header('Authorization'), 5));
+        $jwt = JWT::parse(substr((string) $request->header('Authorization'), 5));
         $clientId = $jwt->claims()->get('aud');
 
         if (is_array($clientId)) {
@@ -54,6 +54,10 @@ class TokenGuard extends BaseTokenGuard
         $userId = $jwt->claims()->get('sub');
         $accessToken = $jwt->claims()->get('jti');
 
+        if (! is_string($clientId) && ! is_int($clientId)) {
+            return null;
+        }
+
         // From this point forward, the code is mostly replicated from the parent's
         // authenticateViaBearerToken() implementation.
         $client = $this->clients->findActive($clientId);
@@ -61,7 +65,11 @@ class TokenGuard extends BaseTokenGuard
         if (! $client ||
             ($client->provider &&
              $client->provider !== $this->provider->getProviderName())) {
-            return;
+            return null;
+        }
+
+        if (! is_string($userId) && ! is_int($userId)) {
+            return null;
         }
 
         // If the access token is valid we will retrieve the user according to the user ID
@@ -70,13 +78,14 @@ class TokenGuard extends BaseTokenGuard
         $user = $this->provider->retrieveById($userId);
 
         if (! $user) {
-            return;
+            return null;
         }
 
         // Next, we will assign a token instance to this user which the developers may use
         // to determine if the token has a given scope, etc. This will be useful during
         // authorization such as within the developer's Laravel model policy classes.
-        $token = Token::find($accessToken);
+        /** @var Token|null $token */
+        $token = is_string($accessToken) ? Token::query()->find($accessToken) : null;
 
         if ($token) {
             $accessTokenInstance = new AccessToken([

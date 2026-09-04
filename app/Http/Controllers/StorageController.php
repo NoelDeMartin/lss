@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Support\Facades\Solid;
 use App\Support\Facades\Sparql;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class StorageController extends Controller
 {
-    public function create()
+    public function create(): Response
     {
         $this->authenticate();
 
@@ -21,13 +24,16 @@ class StorageController extends Controller
             abort(400, 'Invalid content type, expected text/turtle');
         }
 
-        $content = str_starts_with($contentType, 'image/') ? file_get_contents('php://input') : request()->getContent();
+        $content = is_string($contentType) && str_starts_with($contentType, 'image/')
+            ? (string) file_get_contents('php://input')
+            : request()->getContent();
+        /** @var array{status: int} $result */
         $result = Solid::create($path, $content, ['overwrite' => true]);
 
         return response('', $result['status']);
     }
 
-    public function show()
+    public function show(): Response|RedirectResponse|View
     {
         $path = request()->getPathInfo();
 
@@ -44,18 +50,14 @@ class StorageController extends Controller
         }
 
         $file = Solid::read($path);
-        $response = response($file['content'])
+
+        return response($file['content'])
             ->header('WAC-Allow', 'user="read control write"')
-            ->header('Content-Type', $file['mime_type']);
-
-        if (array_key_exists('last_modified', $file)) {
-            $response->header('Last-Modified', $file['last_modified']->toRfc7231String());
-        }
-
-        return $response;
+            ->header('Content-Type', $file['mime_type'])
+            ->header('Last-Modified', $file['last_modified']->toRfc7231String());
     }
 
-    public function update()
+    public function update(): Response
     {
         $user = $this->authenticate();
 
@@ -88,6 +90,7 @@ class StorageController extends Controller
             abort(404);
         }
 
+        /** @var User|null $user */
         $user = Auth::guard('solid')->user();
 
         if (is_null($user) || $user->username !== $username) {

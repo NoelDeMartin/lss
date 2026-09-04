@@ -10,7 +10,7 @@ use League\Flysystem\Filesystem as LeagueFilesystem;
 
 class CloudServiceFake extends CloudService implements Fake
 {
-    protected $filesystem;
+    protected FilesystemAdapter $filesystem;
 
     public function __construct()
     {

@@ -1,28 +1,61 @@
 name: CI
-on: [push]
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+
 jobs:
-  ci:
+  tests:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['8.3', '8.4', '8.5']
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.5
-          extensions: json, dom, curl, libxml, mbstring
+          php-version: ${{ matrix.php-version }}
+          tools: composer:v2
           coverage: none
+
       - name: Prepare The Environment
         run: cp .env.example .env
+
       - name: Install Composer Dependencies
-        run: composer install --no-progress --prefer-dist --optimize-autoloader
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
       - name: Generate Keys
         run: |
           php artisan key:generate
           php artisan passport:keys
-      - name: Run Duster Lint
-        uses: tighten/duster-action@v3
-        with:
-          args: lint
-      - name: Run Static Analysis
-        run: ./vendor/bin/phpstan analyse
+
       - name: Run Tests
-        run: php artisan test
+        run: ./vendor/bin/pest
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+
+      - name: Install Dependencies
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: Lint PHP
+        run: composer lint:check
+
+      - name: Type check PHP
+        run: composer types:check
+

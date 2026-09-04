@@ -6,7 +6,7 @@ use App\Services\SparqlService;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static string updateTurtle(string $turtle, string $update, ?array $options);
+ * @method static string updateTurtle(string $turtle, string $update, array<string, mixed> $options = [])
  *
  * @see SparqlService
  */

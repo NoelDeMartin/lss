@@ -16,7 +16,7 @@ use Tests\TestCase;
 
 arch('Laravel')->preset()->laravel();
 
-uses(TestCase::class, RefreshDatabase::class)->in('Feature');
+pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Feature');
 
 /*
 |--------------------------------------------------------------------------

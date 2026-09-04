@@ -14,16 +14,15 @@ Furthermore, my initial motivation to start tinkering with this was to see how h
 
 ## Development
 
+> [!NOTE]
+> `composer dev` uses `npx concurrently` to stream logs alongside the dev server, so Node.js is required. Alternatively, you can run `php artisan serve --host=localhost` directly.
+
 ```sh
 git clone git@github.com:NoelDeMartin/lss.git lss
 cd lss
-composer install
-cp .env.example .env
-touch database/database.sqlite
-php artisan key:generate
-php artisan passport:keys
+composer setup
 php artisan migrate:fresh --seed
-php artisan serve --host=localhost
+composer dev
 ```
 
 ## Production

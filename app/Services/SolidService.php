@@ -5,7 +5,9 @@ namespace App\Services;
 use App\Models\User;
 use App\Support\Facades\Sparql;
 use App\Support\Serializers\TurtleSerializer;
+use Carbon\CarbonInterface;
 use EasyRdf\Graph;
+use EasyRdf\Literal;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Carbon;
 use League\Flysystem\UnableToReadFile;
@@ -13,13 +15,15 @@ use Symfony\Component\Mime\MimeTypes;
 
 class SolidService
 {
-    protected $user = null;
+    protected ?User $user = null;
 
-    protected $cloud = null;
+    protected ?FilesystemAdapter $cloud = null;
 
     public function syncProfile(User $user): void
     {
-        if (! $user->cloud()->exists("/{$user->cloud_folder}/profile/card.ttl")) {
+        $cloud = $user->cloud();
+
+        if (is_null($cloud) || ! $cloud->exists("/{$user->cloud_folder}/profile/card.ttl")) {
             $this->createProfile($user);
 
             return;
@@ -28,6 +32,9 @@ class SolidService
         $this->updateProfile($user);
     }
 
+    /**
+     * @return array{content: string, mime_type: string, last_modified: CarbonInterface}
+     */
     public function read(string $path): array
     {
         $response = str_ends_with($path, '/') ? $this->readContainer($path) : $this->readDocument($path);
@@ -39,6 +46,10 @@ class SolidService
         return $response;
     }
 
+    /**
+     * @param  array<string, mixed>  $options
+     * @return array{status: int}
+     */
     public function create(string $path, string $content, array $options = []): array
     {
         if (str_ends_with($path, '/')) {
@@ -54,6 +65,7 @@ class SolidService
             abort(404);
         }
 
+        /** @var string $content */
         $content = $this->cloud()->get($this->prepareFilePath($path));
 
         $this->cloud()->put(
@@ -73,22 +85,34 @@ class SolidService
     protected function createProfile(User $user): void
     {
         $card = file_get_contents(resource_path('/templates/card.ttl'));
+        $card = is_string($card) ? $card : '';
         $card = str_replace('{name}', $user->name, $card);
         $card = str_replace('{oidcIssuer}', route('home'), $card);
 
-        $user->cloud()->put("{$user->cloud_folder}/profile/card.ttl", $card);
+        $cloud = $user->cloud();
+
+        if (! is_null($cloud)) {
+            $cloud->put("{$user->cloud_folder}/profile/card.ttl", $card);
+        }
     }
 
     protected function updateProfile(User $user): void
     {
         $base = $user->url('/profile/card');
-        $turtle = $user->cloud()->get("/{$user->cloud_folder}/profile/card.ttl");
+        $cloud = $user->cloud();
+
+        if (is_null($cloud)) {
+            return;
+        }
+
+        /** @var string $turtle */
+        $turtle = $cloud->get("/{$user->cloud_folder}/profile/card.ttl");
         $graph = new Graph($base);
         $serialiser = new TurtleSerializer;
 
         $graph->parse($turtle, 'turtle');
         $this->updateGraphProperty($graph, "{$base}#me", 'foaf:name', $user->name);
-        $user->cloud()->put(
+        $cloud->put(
             "/{$user->cloud_folder}/profile/card.ttl",
             $serialiser->serialise($graph, 'turtle', [
                 'implicit_base' => $user->url(),
@@ -99,19 +123,24 @@ class SolidService
 
     protected function updateGraphProperty(Graph $graph, string $resource, string $property, string $value): void
     {
+        /** @var Literal[] $literals */
         $literals = $graph->allLiterals($resource, $property);
 
         foreach ($literals as $literal) {
-            $graph->deleteLiteral($resource, $property, $literal->getValue());
+            $graph->deleteLiteral($resource, $property, (string) $literal->getValue());
         }
 
         $graph->addLiteral($resource, $property, $value);
     }
 
+    /**
+     * @return array{content: string, mime_type: string, last_modified: CarbonInterface}|null
+     */
     protected function readDocument(string $path): ?array
     {
         try {
             $filePath = $this->prepareFilePath($path);
+            /** @var string $content */
             $content = $this->cloud()->get($filePath);
 
             if (empty($content) && ! $this->filePathExists($path)) {
@@ -128,6 +157,9 @@ class SolidService
         }
     }
 
+    /**
+     * @return array{content: string, mime_type: string, last_modified: CarbonInterface}|null
+     */
     protected function readContainer(string $path): ?array
     {
         $response = $this->readDocument("{$path}.meta");
@@ -137,7 +169,7 @@ class SolidService
         }
 
         $lastModified = Carbon::createFromTimestamp($this->cloud()->lastModified($this->preparePath($path)));
-        $turtle = $response['content'] ?? '';
+        $turtle = (string) ($response['content'] ?? '');
         $turtle .= "\n<> a <http://www.w3.org/ns/ldp#Container> .";
         $turtle .= "\n<> <https://vocab.noeldemartin.com/solid-extra/deepLastModified> \"{$lastModified->toISOString()}\"^^<http://www.w3.org/2001/XMLSchema#dateTime> .";
 
@@ -162,7 +194,7 @@ class SolidService
             }
 
             if (! is_null($lastModifiedTime)) {
-                $lastModifiedDate = $date->setTimestamp($child['last_modified'])->toISOString();
+                $lastModifiedDate = $date->setTimestamp($lastModifiedTime)->toISOString();
 
                 $turtle .= "\n<{$path}{$name}> <http://purl.org/dc/terms/modified> \"{$lastModifiedDate}\"^^<http://www.w3.org/2001/XMLSchema#dateTime> .";
                 $turtle .= "\n<{$path}{$name}> <http://www.w3.org/ns/posix/stat#modified> {$lastModifiedTime} .";
@@ -180,9 +212,13 @@ class SolidService
         ];
     }
 
+    /**
+     * @param  array<string, mixed>  $options
+     * @return array{status: int}
+     */
     protected function createDocument(string $path, string $content, array $options = []): array
     {
-        $overwrite = $options['overwrite'] ?? false;
+        $overwrite = (bool) ($options['overwrite'] ?? false);
         $existed = $this->filePathExists($path);
 
         if (! $overwrite && $existed) {
@@ -196,9 +232,13 @@ class SolidService
         return ['status' => $existed ? 200 : 201];
     }
 
+    /**
+     * @param  array<string, mixed>  $options
+     * @return array{status: int}
+     */
     protected function createContainer(string $path, string $turtle, array $options = []): array
     {
-        $overwrite = $options['overwrite'] ?? false;
+        $overwrite = (bool) ($options['overwrite'] ?? false);
         $existed = $this->pathExists($path);
 
         if (! $overwrite && $existed) {
@@ -212,7 +252,7 @@ class SolidService
         return ['status' => $existed ? 200 : 201];
     }
 
-    protected function pathExists($path): bool
+    protected function pathExists(string $path): bool
     {
         try {
             return $this->cloud()->exists($this->preparePath($path));
@@ -221,7 +261,7 @@ class SolidService
         }
     }
 
-    protected function filePathExists($path): bool
+    protected function filePathExists(string $path): bool
     {
         try {
             return $this->cloud()->exists($this->prepareFilePath($path));
@@ -230,6 +270,9 @@ class SolidService
         }
     }
 
+    /**
+     * @return array<int, array{name: string, last_modified: int|null}>
+     */
     protected function children(string $path): array
     {
         $children = [];
@@ -278,15 +321,24 @@ class SolidService
     protected function user(): User
     {
         if (is_null($this->user)) {
-            $this->user = User::whereUsername(request()->username())->first();
+            $username = request()->username();
 
-            if (is_null($this->user)) {
+            if (is_null($username)) {
                 abort(404);
             }
 
-            if (! $this->user->hasCloud()) {
+            /** @var User|null $user */
+            $user = User::whereUsername($username)->first();
+
+            if (is_null($user)) {
+                abort(404);
+            }
+
+            if (! $user->hasCloud()) {
                 abort(400, 'Cloud configuration missing.');
             }
+
+            $this->user = $user;
         }
 
         return $this->user;
@@ -295,7 +347,13 @@ class SolidService
     protected function cloud(): FilesystemAdapter
     {
         if (is_null($this->cloud)) {
-            $this->cloud = $this->user()->cloud();
+            $cloud = $this->user()->cloud();
+
+            if (is_null($cloud)) {
+                abort(400, 'Cloud configuration missing.');
+            }
+
+            $this->cloud = $cloud;
         }
 
         return $this->cloud;

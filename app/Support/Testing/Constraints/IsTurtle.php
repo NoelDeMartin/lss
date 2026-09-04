@@ -8,9 +8,9 @@ use PHPUnit\Framework\Constraint\Constraint;
 
 class IsTurtle extends Constraint
 {
-    private $uri;
+    private ?string $uri;
 
-    public function __construct(string $uri)
+    public function __construct(?string $uri = null)
     {
         $this->uri = $uri;
     }
@@ -22,21 +22,21 @@ class IsTurtle extends Constraint
 
     protected function matches(mixed $other): bool
     {
-        return is_null($this->getParsingErrorMessage($other));
+        return is_string($other) && is_null($this->getParsingErrorMessage($other));
     }
 
     protected function failureDescription(mixed $other): string
     {
         return sprintf(
             'a string is valid Turtle (%s)',
-            $this->getParsingErrorMessage($other) ?? 'Nothing is actually wrong with this Turtle',
+            is_string($other) ? ($this->getParsingErrorMessage($other) ?? 'Nothing is actually wrong with this Turtle') : 'Given value is not a string',
         );
     }
 
     protected function getParsingErrorMessage(string $turtle): ?string
     {
         try {
-            (new Graph($this->uri))->parse($turtle, 'turtle');
+            (new Graph($this->uri ?? ''))->parse($turtle, 'turtle');
 
             return null;
         } catch (ParserException $e) {

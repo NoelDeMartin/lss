@@ -7,6 +7,9 @@ use EasyRdf\Graph;
 
 class SparqlService
 {
+    /**
+     * @param  array{base?: string, document?: string}  $options
+     */
     public function updateTurtle(string $turtle, string $update, array $options = []): string
     {
         $base = $options['base'] ?? '/';
@@ -34,7 +37,10 @@ class SparqlService
         $operationGraph->parse($turtle, 'turtle');
 
         foreach ($operationGraph->resources() as $resource) {
-            foreach ($resource->propertyUris() as $property) {
+            /** @var string[] $properties */
+            $properties = $resource->propertyUris();
+
+            foreach ($properties as $property) {
                 $literals = $resource->allLiterals("<{$property}>");
                 $resources = $resource->allResources("<{$property}>");
 

@@ -14,6 +14,7 @@ use Laravel\Passport\PassportServiceProvider as BasePassportServiceProvider;
 use Laravel\Passport\PassportUserProvider;
 use League\OAuth2\Server\ResourceServer;
 use League\OAuth2\Server\ResponseTypes\ResponseTypeInterface;
+use RuntimeException;
 
 class PassportServiceProvider extends BasePassportServiceProvider
 {
@@ -29,11 +30,22 @@ class PassportServiceProvider extends BasePassportServiceProvider
         );
     }
 
+    /**
+     * @param  array<string, mixed>  $config
+     */
     protected function makeGuard(array $config): \Laravel\Passport\Guards\TokenGuard
     {
+        /** @var string $providerName */
+        $providerName = $config['provider'];
+        $userProvider = Auth::createUserProvider($providerName);
+
+        if (is_null($userProvider)) {
+            throw new RuntimeException("Unable to create user provider [{$providerName}].");
+        }
+
         return new TokenGuard(
             $this->app->make(ResourceServer::class),
-            new PassportUserProvider(Auth::createUserProvider($config['provider']), $config['provider']),
+            new PassportUserProvider($userProvider, $providerName),
             $this->app->make(ClientRepository::class),
             $this->app->make('encrypter'),
             $this->app->make('request')
