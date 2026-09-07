@@ -123,6 +123,7 @@ class User extends Authenticatable implements MustVerifyEmail, OAuthenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'nextcloud_password' => 'encrypted',
         ];
     }
 }
