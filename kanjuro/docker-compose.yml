@@ -13,5 +13,5 @@ services:
 
 networks:
     default:
-        name: nginx-agora
+        name: nginx-agora-lss
         external: true
