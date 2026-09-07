@@ -1,7 +1,14 @@
 <?php
 
 use App\Models\User;
+use App\Support\DnsResolver;
 use App\Support\Facades\Cloud;
+
+beforeEach(function () {
+    $this->mock(DnsResolver::class)
+        ->shouldReceive('resolve')
+        ->andReturn(['93.184.216.34']);
+});
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();
