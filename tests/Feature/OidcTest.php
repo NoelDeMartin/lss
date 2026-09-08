@@ -123,3 +123,20 @@ it('uses DPoP headers to authenticate', function () {
 
     $response->assertStatus(201);
 });
+
+it('reuses existing clients during registration', function () {
+    $firstResponse = $this->post('/.oidc/register', [
+        'client_name' => 'Umai',
+        'redirect_uris' => ['https://umai.noeldemartin.com', 'https://app.example.com/callback'],
+    ]);
+
+    $secondResponse = $this->post('/.oidc/register', [
+        'client_name' => 'Umai',
+        'redirect_uris' => ['https://app.example.com/callback', 'https://umai.noeldemartin.com'],
+    ]);
+
+    $firstResponse->assertSuccessful();
+    $secondResponse->assertSuccessful();
+    expect($secondResponse->json('client_id'))->toBe($firstResponse->json('client_id'));
+    expect(Client::where('name', 'Umai')->count())->toBe(1);
+});
