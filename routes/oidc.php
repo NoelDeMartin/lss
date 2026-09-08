@@ -19,7 +19,9 @@ Route::withoutMiddleware([PreventRequestForgery::class])->group(function () {
             'id_token_signing_alg_values_supported' => ['ES256'],
         ];
     })->name('oidc.config');
-    Route::post('.oidc/register', [OidcController::class, 'register'])->name('oidc.register');
+    Route::post('.oidc/register', [OidcController::class, 'register'])
+        ->middleware('throttle:10,1')
+        ->name('oidc.register');
     Route::get('.oidc/jwks', [OidcController::class, 'jwks'])->name('oidc.jwks');
 });
 
