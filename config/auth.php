@@ -118,4 +118,61 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Reserved Usernames
+    |--------------------------------------------------------------------------
+    |
+    | These usernames are reserved for system routing, protocols, and
+    | infrastructure, and cannot be registered by users.
+    |
+    */
+
+    'reserved_usernames' => [
+        'account',
+        'admin',
+        'administrator',
+        'api',
+        'app',
+        'assets',
+        'auth',
+        'cdn',
+        'cloud',
+        'dashboard',
+        'developer',
+        'dns',
+        'email',
+        'help',
+        'id',
+        'imap',
+        'localhost',
+        'login',
+        'logout',
+        'mail',
+        'media',
+        'ns',
+        'ns1',
+        'ns2',
+        'oauth',
+        'oidc',
+        'openid',
+        'pop',
+        'profile',
+        'register',
+        'root',
+        'security',
+        'settings',
+        'smtp',
+        'solid',
+        'staging',
+        'static',
+        'status',
+        'storage',
+        'support',
+        'sysadmin',
+        'system',
+        'wellknown',
+        'www',
+    ],
+
 ];
