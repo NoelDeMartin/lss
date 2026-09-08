@@ -91,6 +91,8 @@ it('reads binaries', function () {
 
     $response->assertStatus(200);
     $response->assertHeader('Content-Type', 'image/jpeg');
+    $response->assertHeader('Content-Security-Policy', 'sandbox');
+    $response->assertHeader('X-Content-Type-Options', 'nosniff');
     $response->assertSee('SPIRITED AWAY IMAGE');
 });
 

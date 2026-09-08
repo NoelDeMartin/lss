@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Support\Facades\Solid;
 use App\Support\Facades\Sparql;
+use App\Support\SecurityHeaders;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
@@ -51,10 +52,11 @@ class StorageController extends Controller
 
         $file = Solid::read($path);
 
-        return response($file['content'])
-            ->header('WAC-Allow', 'user="read control write"')
-            ->header('Content-Type', $file['mime_type'])
-            ->header('Last-Modified', $file['last_modified']->toRfc7231String());
+        return SecurityHeaders::untrusted($file['content'], headers: [
+            'WAC-Allow' => 'user="read control write"',
+            'Content-Type' => $file['mime_type'],
+            'Last-Modified' => $file['last_modified']->toRfc7231String(),
+        ]);
     }
 
     public function update(): Response
