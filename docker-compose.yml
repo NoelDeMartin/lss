@@ -1,6 +1,8 @@
 services:
     app:
         image: noeldemartin/lss
+        security_opt:
+            - no-new-privileges:true
         volumes:
             - ./database/database.sqlite:/app/database/database.sqlite
             - ./storage:/app/storage
