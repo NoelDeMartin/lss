@@ -10,6 +10,9 @@ RUN set -x \
     && docker-php-ext-enable bcmath \
     && php -r "readfile('http://getcomposer.org/installer');" | php -- --install-dir=/usr/bin/ --filename=composer
 
+# Use production configuration
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
 # Install Supervisor
 RUN apk add --no-cache supervisor
 
